@@ -43,7 +43,7 @@ class TagGenerationAgent(BaseChatAgent):
             ]
 
             client = llm_model.initialize_model()
-            result = call_llm_with_retry(client= client, llm_model=llm_model, response_model=Response,
+            result = await call_llm_with_retry(client= client, llm_model=llm_model, response_model=Response,
                                          messages=messages, agent_name = llm_model.get_model_name(), method_name = "classify")
 
             result_dict = result.model_dump()
