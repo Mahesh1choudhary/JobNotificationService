@@ -99,7 +99,29 @@ class PostgresSQLDatabaseClient(BaseDatabaseClient):
             yield conn
 
 
+    @asynccontextmanager
+    async def transaction(self):
+        async with self.get_connection() as conn:
+            async with conn.transaction():
+                yield conn
 
+
+    async def fetch(self, query:str, *args):
+        async with self.get_connection() as conn:
+            return await conn.fetch(query, *args)
+
+
+    async def fetchrow(self, query:str, *args):
+        async with self.get_connection() as conn:
+            return await conn.fetchrow(query, *args)
+
+    async def execute(self, query:str, *args):
+        async with self.transaction() as conn:
+            return await conn.execute(query, *args)
+
+    async def executemany(self, query: str, args_list):
+        async with self.transaction() as conn:
+            await conn.executemany(query, args_list)
 
 
 class DatabaseClientFactory():
