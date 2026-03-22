@@ -185,6 +185,7 @@ if __name__ == "__main__":
     repo = InMemoryJobRepository()
     svc = GreenhouseJobService(repo)
     svc.import_from_compressed(args.input)
+    print(repo.list_by_status("CREATED"))
 
     if args.flush:
         svc.flush_outbox(example_publisher)
