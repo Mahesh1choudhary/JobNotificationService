@@ -1,7 +1,7 @@
 import logging
 import argparse
 
-from repository.job_repository import InMemoryJobRepository
+from repository.in_memory_job_repository import InMemoryJobRepository
 from service.greenhouse_job_service import GreenhouseJobService, example_publisher
 
 logging.basicConfig(level=logging.INFO)
@@ -17,6 +17,7 @@ if __name__ == "__main__":
     repo = InMemoryJobRepository()
     svc = GreenhouseJobService(repo)
     svc.import_from_compressed(args.input)
+    print(repo.list_by_status("CREATED"))
 
     if args.flush:
         svc.flush_outbox(example_publisher)

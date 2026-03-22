@@ -1,13 +1,20 @@
+import sys
 import os
-import time
-import argparse
 import logging
-from typing import List, Dict
+from pathlib import Path
+from typing import List, Dict, Any
+import json
 
-# imports the class from the existing module
-# from compress_greenhouse_clients import GreenhouseCompressor
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-class GreenhouseCompressor:
+# ensure project root is on sys.path so we can import compress_greenhouse_clients
+project_root = Path(__file__).resolve().parents[2]  # .../job_notification_service
+sys.path.insert(0, str(project_root))
+
+# from compress_greenhouse_clients import GreenhouseCompressor  # type: ignore
+
+
+class GreenhouseCompressorService:
     def __init__(self, input_paths: List[str]):
         self.input_paths = input_paths
 
@@ -38,80 +45,58 @@ class GreenhouseCompressor:
 
     def compress_to(self, output_path: str):
         entries = self.extract_linkedin_entries()
+        # determine final output path: if caller passed an absolute path, use it;
+        # otherwise write into project_root so the output JSON lands at repo root.
+        out_p = Path(output_path)
+        if not out_p.is_absolute():
+            out_p = project_root / out_p
+
+        # ensure parent dirs exist
+        # out_p.parent.mkdir(parents=True, exist_ok=True)
+
         # write compressed JSON
-        with open(output_path, "w", encoding="utf-8") as out:
+        with open(str(out_p), "w", encoding="utf-8") as out:
             json.dump({"data": entries}, out, indent=2, ensure_ascii=False)
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-
-
-def full_paths(resources_dir: str, filenames: List[str]) -> List[str]:
-    return [os.path.join(resources_dir, os.path.basename(f)) for f in filenames]
+        logging.info("Wrote compressed file: %s", out_p)
 
 
-def get_mtimes(paths: List[str]) -> Dict[str, float]:
-    mt = {}
-    for p in paths:
-        try:
-            mt[p] = os.path.getmtime(p)
-        except OSError:
-            mt[p] = 0.0
-    return mt
+# class GreenhouseCompressorService:
+#     """
+#     Service wrapper around GreenhouseCompressor.
 
+#     Usage:
+#       svc = GreenhouseCompressorService(resources_dir="path/to/app_v1/resources")
+#       await svc.compress(["greenhouse_clients.json", "greenhouse_clients_page_1.json"])
+#     """
 
-def run_service(resources_dir: str, input_files: List[str], output_file: str, interval: float, once: bool):
-    inputs = full_paths(resources_dir, input_files)
-    # write output to parent of the resources directory (outside the service folder)
-    output_dir = os.path.abspath(os.path.join(resources_dir, os.pardir))
-    os.makedirs(output_dir, exist_ok=True)
-    output = os.path.join(output_dir, os.path.basename(output_file))
-    logging.info("Service starting. inputs=%s output=%s interval=%s once=%s", inputs, output, interval, once)
+#     def __init__(self, resources_dir: str | Path | None = None):
+#         if resources_dir is None:
+#             resources_dir = Path(__file__).resolve().parents[1] / "resources"
+#         self.resources_dir = Path(resources_dir)
 
-    last_mtimes = get_mtimes(inputs)
+#     async def compress(self, input_files: List[str], output_name: str = "greenhouse_clients_compressed.json") -> Path:
+#         """
+#         Compress the given input_files into <resources_dir>/<output_name>.
 
-    # perform initial compression
-    compressor = GreenhouseCompressor(inputs)
-    try:
-        compressor.compress_to(output)
-        logging.info("Initial compression written to %s", output)
-        last_mtimes = get_mtimes(inputs)
-    except Exception as e:
-        logging.error("Initial compression failed: %s", e)
+#         input_files may be absolute paths or filenames relative to resources_dir.
+#         """
+#         os.makedirs(self.resources_dir, exist_ok=True)
 
-    if once:
-        return
+#         resolved_inputs: List[str] = []
+#         for f in input_files:
+#             p = Path(f)
+#             if p.is_absolute():
+#                 resolved_inputs.append(str(p))
+#             elif p.parent == Path('.'):
+#                 # treat as filename relative to resources_dir
+#                 resolved_inputs.append(str(self.resources_dir / p.name))
+#             else:
+#                 # a relative path containing subdirs -> interpret relative to resources_dir
+#                 resolved_inputs.append(str(self.resources_dir / p))
 
-    while True:
-        time.sleep(interval)
-        current_mtimes = get_mtimes(inputs)
-        changed = any(current_mtimes[p] != last_mtimes.get(p, 0.0) for p in inputs)
-        if changed:
-            logging.info("Change detected in inputs, recompressing...")
-            compressor = GreenhouseCompressor(inputs)
-            try:
-                compressor.compress_to(output)
-                logging.info("Recompression written to %s", output)
-                last_mtimes = current_mtimes
-            except Exception as e:
-                logging.error("Recompression failed: %s", e)
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Service to compress greenhouse client JSONs from resources folder.")
-    parser.add_argument("--resources", default="resources", help="Resources directory containing input files.")
-    parser.add_argument(
-        "--inputs",
-        nargs="+",
-        default=[
-            "resources/greenhouse_clients.json",
-            "resources/greenhouse_clients_page_1.json",
-        ],
-        help="Input filenames or paths (can be inside resources/)."
-    )
-    parser.add_argument("--output", default="greenhouse_clients_compressed.json", help="Output filename (will be placed outside the service/resources folder).")
-    parser.add_argument("--interval", type=float, default=10.0, help="Polling interval in seconds (ignored when --once).")
-    parser.add_argument("--once", action="store_true", help="Run one compression and exit.")
-    args = parser.parse_args()
-
-    run_service(args.resources, args.inputs, args.output, args.interval, args.once)
-
+#         compressor = GreenhouseCompressor(resolved_inputs)
+#         output_path = self.resources_dir / output_name
+#         # call the existing synchronous API; keep method async for compatibility with other services
+#         compressor.compress_to(str(output_path))
+#         logging.info("Wrote compressed file: %s", output_path)
+#         return output_path
