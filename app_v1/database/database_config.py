@@ -3,6 +3,9 @@ from typing import Dict, ClassVar, Any, Type
 from pydantic import BaseModel, ConfigDict
 
 from app_v1.commons.service_logger import setup_logger
+from app_v1.config.config_classes import DatabaseWrapperConfig
+from app_v1.config.config_loader import fetch_key_value
+from app_v1.config.config_keys import DATABASE_CONFIG_KEY
 
 logger = setup_logger()
 
@@ -22,20 +25,15 @@ class PostgresSQLDatabaseConfig(BaseDatabaseConfig):
     def get_database_name(cls) -> str:
         return cls._backend_database_name
 
-    #TODO: should be config driven
     postgresSQL_db_name: str
     postgresSQL_db_user: str
     postgresSQL_db_password: str
     postgresSQL_db_host: str
-    postgresSQL_db_port: str
-
-    batch_size: int = 5000
-    max_workers: int = 10
+    postgresSQL_db_port: int
     postgresSQL_db_connection_pool_min:int = 2
     postgresSQL_db_connection_pool_max:int = 5
 
     model_config = ConfigDict(extra="forbid")  # no extra fields allowed
-
 
 
 
@@ -47,7 +45,8 @@ class DatabaseConfigFactory():
 
     @classmethod
     def create_database_config(cls) -> BaseDatabaseConfig:
-        backend_database_name:str = "postgresSQL" #TODO: fetch from config only along with config_data
+        backend_database_config:DatabaseWrapperConfig = fetch_key_value(DATABASE_CONFIG_KEY, DatabaseWrapperConfig)
+        backend_database_name:str = backend_database_config.database_name
 
         if backend_database_name not in cls._config_classes:
             available_backend_databases = ", ".join(cls._config_classes.keys())
@@ -55,13 +54,7 @@ class DatabaseConfigFactory():
 
 
         try:
-            config_data: Dict[str, Any]= {
-                "postgresSQL_db_name": "name",
-                "postgresSQL_db_user": "user",
-                "postgresSQL_db_password": "password",
-                "postgresSQL_db_host": "host",
-                "postgresSQL_db_port": "0000"
-            }
+            config_data = backend_database_config.database_config_data
             database_config: BaseDatabaseConfig = cls._config_classes[backend_database_name](**config_data)
 
             logger.info(f"Database config successfully created for {backend_database_name}")
