@@ -13,7 +13,7 @@ from app_v1.llm.llm_model.gpt5_1_llm_model import GPT51LLMModel
 async def lifespan(app:FastAPI):
     # setting llm manager and creating database instance
     llm_manager = LLMManager()
-    llm_manager.set_classification_model(GPT51LLMModel)
+    llm_manager.set_tag_generation_model(GPT51LLMModel)
 
     database_config = DatabaseConfigFactory.create_database_config()
     database_manager = DatabaseManager(database_config)
@@ -28,7 +28,7 @@ async def lifespan(app:FastAPI):
 
 
 def create_app() -> FastAPI:
-    app = FastAPI()
+    app = FastAPI(lifespan=lifespan)
     return app
 
 def print_routes(app: FastAPI) -> None:

@@ -47,7 +47,7 @@ class DatabaseConfigFactory():
 
     @classmethod
     def create_database_config(cls) -> BaseDatabaseConfig:
-        backend_database_name:str = "" #TODO: fetch from config only along with config_data
+        backend_database_name:str = "postgresSQL" #TODO: fetch from config only along with config_data
 
         if backend_database_name not in cls._config_classes:
             available_backend_databases = ", ".join(cls._config_classes.keys())
