@@ -15,7 +15,9 @@ def fetch_key_value(key:Union[str,Enum], value_model: Type[T]) -> T:
     env_type = os.getenv(EnvironmentConfigClass.ENV.value, "local")
 
     #TODO: update for deployment and should be single time - so store in cache
-    config_data_file_path = f"config/config_data.json"
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+    config_data_file_path = os.path.join(PROJECT_ROOT,f"app_v1/config/config_data.json")
     if not os.path.exists(config_data_file_path):
         logger.error(f"{config_data_file_path} does not exist", exc_info=True)
         raise ValueError(f"config file for ENV:'{env_type}' not found at {config_data_file_path}.")
