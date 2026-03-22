@@ -1,6 +1,29 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 import uvicorn
 
+from app_v1.database.database_config import BaseDatabaseConfig, DatabaseConfigFactory
+from app_v1.database.database_manager import DatabaseManager
+from app_v1.llm.llm_manager import LLMManager
+from app_v1.llm.llm_model.gpt5_1_llm_model import GPT51LLMModel
+
+
+@asynccontextmanager
+async def lifespan(app:FastAPI):
+    # setting llm manager and creating database instance
+    llm_manager = LLMManager()
+    llm_manager.set_classification_model(GPT51LLMModel)
+
+    database_config = DatabaseConfigFactory.create_database_config()
+    database_manager = DatabaseManager(database_config)
+    await database_manager.init()
+
+    app.state.database_manager = database_manager
+
+    yield
+
+    await database_manager.close()
 
 
 

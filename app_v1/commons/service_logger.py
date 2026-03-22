@@ -5,13 +5,16 @@ from logging.handlers import RotatingFileHandler
 from typing import Optional
 
 service_logger: Optional[logging.Logger] = None
-_lock = threading.Lock()
+_thread_lock = threading.Lock()
 
 def setup_logger():
     global service_logger
 
     if service_logger is None:
-        with _lock:
+        with _thread_lock:
+            if service_logger is not None:
+                return service_logger
+
             logger = logging.getLogger("Service_logger")
             logger.setLevel(logging.DEBUG)
 
