@@ -1,0 +1,9 @@
+microsoft:
+  type: API
+  list: https://apply.careers.microsoft.com/api/pcsx/search?domain=microsoft.com&query=&location=India&start=0& 
+  get: https://apply.careers.microsoft.com/api/pcsx/position_details?position_id=1970393556745075&domain=microsoft.com&hl=en&queried_location=India 
+
+stripe:
+  type: API
+  list: https://stripe.com/jobs/search?query=software&office_locations=Asia+Pacific--Bengaluru&view_type=list 
+  get: 
