@@ -46,14 +46,14 @@ if __name__ == "__main__":
         "--inputs",
         nargs="+",
         default=[
-            "greenhouse_clients.json",
-            "greenhouse_clients_page_1.json",
+            "resources/greenhouse_clients.json",
+            "resources/greenhouse_clients_page_1.json",
         ],
         help="Input JSON files (space separated)."
     )
     parser.add_argument(
         "--output",
-        default="greenhouse_clients_compressed.json",
+        default="resources/greenhouse_clients_compressed.json",
         help="Output compressed JSON path."
     )
     args = parser.parse_args()
