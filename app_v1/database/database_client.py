@@ -1,10 +1,14 @@
 import asyncio
 import threading
 from abc import ABC, abstractmethod
+from contextlib import asynccontextmanager
 from typing import Optional
+import asyncpg
 
+from app_v1.commons.service_logger import setup_logger
 from app_v1.database.database_config import PostgresSQLDatabaseConfig, BaseDatabaseConfig
 
+logger = setup_logger()
 
 class BaseDatabaseClient(ABC):
 
@@ -20,7 +24,7 @@ class BaseDatabaseClient(ABC):
         pass
 
     @abstractmethod
-    def get_pool(self):
+    def get_connection(self):
         pass
 
 
@@ -36,7 +40,7 @@ class PostgresSQLDatabaseClient(BaseDatabaseClient):
             with cls._thread_lock:
                 if cls._instance is not None:
                     return cls._instance
-                cls._instance = super(PostgresSQLDatabaseClient, cls).__new__(cls, *args, **kwargs)
+                cls._instance = super(PostgresSQLDatabaseClient, cls).__new__(cls)
 
         return cls._instance
 
@@ -55,21 +59,43 @@ class PostgresSQLDatabaseClient(BaseDatabaseClient):
     async def init(self):
         if self._initialized:
             return
+        try:
+            async with self.async_lock:
+                if self._initialized:
+                    return
 
-        async with self.async_lock:
-            if self._initialized:
-                return
+                #database_url = f"postgresql+asyncpg://{self._database_config.postgresSQL_db_name}:{self._database_config.postgresSQL_db_password}@{self._database_config.postgresSQL_db_host}:{self._database_config.postgresSQL_db_port}/{self._database_config.postgresSQL_db_name}?sslmode=require"
 
-            self._initialized = True
-            #TODO: remaining initialization
+                self._connection_pool = await asyncpg.create_pool(
+                    user="a",
+                    password="a",
+                    database="a",
+                    host="a",
+                    port=1,
+                    ssl="require",
+                    min_size=2,
+                    max_size=10,
+                )
+                self._initialized = True
+            logger.info("PostgresSQL database client initialized")
+        except Exception as e:
+            logger.error("Error initializing postgresSQL database client")
+            raise
 
 
     async def close(self):
-        pass
+        if self._connection_pool:
+            await self._connection_pool.close()
+            self._connection_pool = None
+            self._initialized = False
 
+    @asynccontextmanager
+    async def get_connection(self):
+        if not self._initialized or not self._connection_pool:
+            raise RuntimeError("Database client not initialized")
 
-    def get_pool(self):
-        pass
+        async with self._connection_pool.acquire() as conn:
+            yield conn
 
 
 
