@@ -4,3 +4,4 @@
 --pycache__/
 *.pyc
 *.env
+app_v1/config/config_data.json
