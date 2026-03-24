@@ -13,7 +13,7 @@ logger = setup_logger()
 class BaseDatabaseClient(ABC):
 
     def __init__(self, config: BaseDatabaseConfig):
-        self._database_config = BaseDatabaseConfig
+        self._database_config = config
 
     @abstractmethod
     async def init(self):
@@ -50,6 +50,7 @@ class PostgresSQLDatabaseClient(BaseDatabaseClient):
                 raise ValueError("PostgresSQL database client already initialized with different config. ")
             return
 
+        self._database_config: PostgresSQLDatabaseConfig = None
         super().__init__(config)
         self._constructed = True
         self._initialized = False
@@ -67,19 +68,19 @@ class PostgresSQLDatabaseClient(BaseDatabaseClient):
                 #database_url = f"postgresql+asyncpg://{self._database_config.postgresSQL_db_name}:{self._database_config.postgresSQL_db_password}@{self._database_config.postgresSQL_db_host}:{self._database_config.postgresSQL_db_port}/{self._database_config.postgresSQL_db_name}?sslmode=require"
 
                 self._connection_pool = await asyncpg.create_pool(
-                    user="a",
-                    password="a",
-                    database="a",
-                    host="a",
-                    port=1,
+                    user= self._database_config.postgresSQL_db_user,
+                    password= self._database_config.postgresSQL_db_password,
+                    database= self._database_config.postgresSQL_db_name,
+                    host= self._database_config.postgresSQL_db_host,
+                    port= self._database_config.postgresSQL_db_port,
                     ssl="require",
-                    min_size=2,
-                    max_size=10,
+                    min_size= self._database_config.postgresSQL_db_connection_pool_min,
+                    max_size= self._database_config.postgresSQL_db_connection_pool_max,
                 )
                 self._initialized = True
             logger.info("PostgresSQL database client initialized")
         except Exception as e:
-            logger.error("Error initializing postgresSQL database client")
+            logger.error("Error initializing postgresSQL database client", exc_info=True)
             raise
 
 
@@ -98,7 +99,29 @@ class PostgresSQLDatabaseClient(BaseDatabaseClient):
             yield conn
 
 
+    @asynccontextmanager
+    async def transaction(self):
+        async with self.get_connection() as conn:
+            async with conn.transaction():
+                yield conn
 
+
+    async def fetch(self, query:str, *args):
+        async with self.get_connection() as conn:
+            return await conn.fetch(query, *args)
+
+
+    async def fetchrow(self, query:str, *args):
+        async with self.get_connection() as conn:
+            return await conn.fetchrow(query, *args)
+
+    async def execute(self, query:str, *args):
+        async with self.transaction() as conn:
+            return await conn.execute(query, *args)
+
+    async def executemany(self, query: str, args_list):
+        async with self.transaction() as conn:
+            await conn.executemany(query, args_list)
 
 
 class DatabaseClientFactory():
