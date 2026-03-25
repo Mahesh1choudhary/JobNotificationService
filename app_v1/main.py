@@ -9,11 +9,11 @@ import logging
 # call startup helper to ensure compressed resources exist
 from startup import ensure_compressed  # type: ignore
 
-from app_v1.database.database_config import BaseDatabaseConfig, DatabaseConfigFactory
+from app_v1.database.database_config import DatabaseConfigFactory
 from app_v1.database.database_manager import DatabaseManager
 from app_v1.llm.llm_manager import LLMManager
 from app_v1.llm.llm_model.gpt5_1_llm_model import GPT51LLMModel
-from app_v1.repository.job_repository import JobRepository
+from app_v1.database.repository.job_repository import JobRepository
 from app_v1.service.greenhouse_job_polling_service import (
     GreenhouseJobPollingService,
     poll_interval_from_env,

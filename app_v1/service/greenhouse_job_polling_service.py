@@ -9,7 +9,7 @@ from typing import Any
 import requests
 
 from app_v1.commons.service_logger import setup_logger
-from app_v1.repository.job_repository import JobInsertRow, JobRepository
+from app_v1.database.repository.job_repository import JobInsertRow, JobRepository
 
 logger = setup_logger()
 
