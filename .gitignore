@@ -5,3 +5,5 @@
 *.pyc
 *.env
 app_v1/config/config_data.json
+Future_features.md
+functional_testing.py
