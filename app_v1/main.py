@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -12,6 +13,12 @@ from app_v1.database.database_config import BaseDatabaseConfig, DatabaseConfigFa
 from app_v1.database.database_manager import DatabaseManager
 from app_v1.llm.llm_manager import LLMManager
 from app_v1.llm.llm_model.gpt5_1_llm_model import GPT51LLMModel
+from app_v1.repository.job_repository import JobRepository
+from app_v1.service.greenhouse_job_polling_service import (
+    GreenhouseJobPollingService,
+    poll_interval_from_env,
+    polling_enabled_from_env,
+)
 
 
 @asynccontextmanager
@@ -35,7 +42,27 @@ async def lifespan(app:FastAPI):
 
     app.state.database_manager = database_manager
 
+    poll_task: asyncio.Task | None = None
+    if polling_enabled_from_env():
+        resources_dir = Path(__file__).resolve().parent / "resources"
+        compressed_path = resources_dir / "greenhouse_clients_compressed.json"
+        job_repo = JobRepository(database_manager.database_client)
+        poller = GreenhouseJobPollingService(
+            job_repo,
+            compressed_json_path=compressed_path,
+            poll_interval_seconds=poll_interval_from_env(),
+        )
+        poll_task = asyncio.create_task(poller.run_forever())
+        app.state.greenhouse_poll_task = poll_task
+
     yield
+
+    if poll_task is not None:
+        poll_task.cancel()
+        try:
+            await poll_task
+        except asyncio.CancelledError:
+            pass
 
     await database_manager.close()
 
