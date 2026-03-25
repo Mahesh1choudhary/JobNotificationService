@@ -1,6 +1,7 @@
 from app_v1.commons.service_logger import setup_logger
 from app_v1.database.database_client import BaseDatabaseClient
 from app_v1.database.database_models.company import Company
+from app_v1.database.tables import DatabaseTables
 
 logger = setup_logger()
 
@@ -12,7 +13,7 @@ class CompanyRepository():
 
     async def upsert_company(self, input_company_name: str, input_job_list_fetch_url) -> Company:
         query = f"""
-        INSERT INTO companies (company_name, job_list_fetch_url)
+        INSERT INTO {DatabaseTables.COMPANY_TABLE.value} (company_name, job_list_fetch_url)
         VALUES ($1, $2)
         ON CONFLICT (company_name)
         DO UPDATE SET job_list_fetch_url = EXCLUDED.job_list_fetch_url
@@ -28,7 +29,7 @@ class CompanyRepository():
 
 
     async def get_company_by_name(self, input_company_name: str) -> Company | None:
-        query = "SELECT * FROM companies WHERE company_name = $1"
+        query = f"SELECT * FROM {DatabaseTables.COMPANY_TABLE.value} WHERE company_name = $1"
 
         try:
             row = await self._database_client.fetchrow(query, input_company_name)
