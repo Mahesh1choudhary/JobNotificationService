@@ -11,3 +11,6 @@ class DatabaseWrapperConfig(BaseModel):
 
 class EnvironmentConfigClass(Enum):
     ENV = "ENV"
+
+
+TELEGRAM_BOT_NAME = "JobNotificationSenderBot"
