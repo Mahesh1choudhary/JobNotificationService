@@ -11,30 +11,35 @@ from app_v1.llm.helpers import call_llm_with_retry
 from app_v1.llm.llm_manager import LLMManager
 from app_v1.llm.llm_model.base_llm_model import LLMModel
 from app_v1.commons.service_logger import setup_logger
+from app_v1.models.data_models.job_tag_response import JobTagResponse
 
 llm_manager = LLMManager()
 logger = setup_logger()
 
 class TagGenerationAgent(BaseChatAgent):
 
+    def __init__(self):
+        self._agent_name = "TagGenerationAgent"
+        self._description = "An agent that extracts technical tags from job descriptions."
+        super().__init__(name= self._agent_name, description=self._description)
+
 
     async def on_messages(self,  messages: Sequence[BaseChatMessage], cancellation_token: CancellationToken):
         result = await self.generate_tags(messages)
+        json_result = result.model_dump_json()
         return Response(
-            chat_message = TextMessage(content=result, source = self.name)
+            chat_message = TextMessage(content=json_result, source = self.name)
         )
 
 
+    async def generate_tags(self, job_description: Sequence[BaseChatMessage]) -> JobTagResponse:
 
-
-    async def generate_tags(self, data: Sequence[BaseChatMessage]):
-
-        llm_model: LLMModel = llm_manager.get_model()
+        llm_model: LLMModel = llm_manager.get_tag_generation_model()
         template = PromptTemplate(
-            input_variables=["data"],
-            template = llm_model.get_post_classification_template(),
+            input_variables=["job_description"],
+            template = llm_model.get_job_tag_generation_template(),
         )
-        prompt = template.format() #TODO: pass the content accordingly
+        prompt = template.format(job_description = job_description)
 
         try:
             messages = [
@@ -43,13 +48,17 @@ class TagGenerationAgent(BaseChatAgent):
             ]
 
             client = llm_model.initialize_model()
-            result = await call_llm_with_retry(client= client, llm_model=llm_model, response_model=Response,
-                                         messages=messages, agent_name = llm_model.get_model_name(), method_name = "classify")
+            result:JobTagResponse = await call_llm_with_retry(client= client, llm_model=llm_model, response_model=JobTagResponse,
+                                         messages=messages, agent_name = llm_model.get_model_name(), method_name = "generate_tags")
 
-            result_dict = result.model_dump()
-            #TODO: extract required output
-            return result_dict
+            return result
 
         except Exception as exc:
-            logger.error("Error generating tags with error: exc", exc_info=True)
+            logger.error("Error generating tags", exc_info=True)
+            raise
 
+    def produced_message_types(self) -> Sequence[type[BaseChatMessage]]:
+        pass
+
+    async def on_reset(self, cancellation_token: CancellationToken) -> None:
+        pass

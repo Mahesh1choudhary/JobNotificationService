@@ -1,5 +1,12 @@
+import instructor
+from openai import AsyncOpenAI
+
+from app_v1.commons.service_logger import setup_logger
+from app_v1.config.config_keys import OPENAI_API_KEY
+from app_v1.config.config_loader import fetch_key_value
 from app_v1.llm.llm_model.base_llm_model import LLMModel
 
+logger = setup_logger()
 
 class GPT51LLMModel(LLMModel):
 
@@ -12,12 +19,44 @@ class GPT51LLMModel(LLMModel):
         return self.llm_model_name
 
     def initialize_model(self):
-        #TODO: update the initializaion logic
-        api_key = ""
-        if not api_key:
-            raise ValueError("API key is not provided")
+        try:
+            open_api_key = fetch_key_value(OPENAI_API_KEY, str)
+            if not open_api_key:
+                raise ValueError("API key is not provided")
+            client = instructor.patch(AsyncOpenAI(api_key=open_api_key))
+            return client
+        except Exception as e:
+            logger.error(f"Error initializing {self.get_model_name()}", exc_info=True)
+            raise
 
     def get_job_tag_generation_template(self) -> str:
-        #TODO: update the prompt accordingly
         return """
+        ### Role
+        You are expert at extracting structured job information from the job description.
+        
+        ### Task
+        Your task is analyze the given job description and extract specific fields:
+            - `job_company_name` : string -> Name of the company offering the job
+            - `job_experience_level`: "Intern" | "FullTime" -> 
+                - "Intern" if internship
+                - "FullTime" if full-time roles
+            - `job_location`: string -> Location of the job. Should be city name, Country name or remote if applicable
+            - `job_department`: string -> Department based on job work. Examples- Engineering, Sales, Finance, etc
+            - `job_role_name`: string -> Name of the job. Examples: SDE 1, SDE 2, Staff Engineer, Customer Success Manager, etc
+            
+        ### Input:
+        - `job_description`: {job_description}
+        
+        ### Rules:
+        - Return ***valid JSON***. All keys must be present in output
+        - No key should be ull, choose the best possible value
+        
+        ### Output:
+        {{
+            "job_company_name": `job_company_name`
+            "job_experience_level": `job_experience_level`
+            "job_location": `job_location`
+            "job_department": `job_department`
+            "job_role_name": `job_role_name`
+        }}
         """
