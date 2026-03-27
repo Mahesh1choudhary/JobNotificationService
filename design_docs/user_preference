@@ -1,0 +1,101 @@
+
+
+Each New Job will have some tags:
+    - Company name
+    - Location
+    - Department ( Engineering, Sales, etc)
+    - Role Name ( MTS1, MTS3, SDE 1, Staff Engineer, etc)
+    - Role field ( Storage, AI, Big Data, etc) ( future scope)
+    - Programming language , tech stack ,etc  ( future scope)
+    - Compensation Range ( future scope)
+    - Years of experiences ( future scope - optional)
+
+
+Each user will have some preferences and want to receive Job notifications as per his/her preferences only
+Possible Preferences example:
+    - (Company:Flipkart, Location-Bangalore, Role Name - SDE1), (Company:Amazon, Location-All locations, Role Name - SDE2), some more preferences
+    - (Company - All companies, Location: Bangalore, Hyderabad, Role: SDE1, SDE2)
+
+So a user can select any combination.
+
+
+
+
+ => Flow
+ Job -> Generate tags for job -> find all the user to whom this job notification needs to be sent -> sent notification to selected users
+
+
+ => How to store into so that 'finding interested user' is scalable.
+ Estimates( all guess are maximal)
+ Total companies - 1000 ( guess- considering companies with good names and good pay)
+ Total Location - 1000 ( guess -> on average 5-6 locations per country * 200 countries)
+ Total departments - 15-20 only
+ Total Role names -> 1000 ( random guess - as most roles names are same across companies)
+ Remaining parameters are also limited
+
+ User-> initially it will be around 40-50 ( upper limit 100) only
+ If we make it available for all-> around 10,000 to 50,000
+
+
+  -> Storage strategy 1
+    For each user, store all the preferences he/she has
+
+    User preference table
+    user_id- int
+    user_preferences- List of preferences( as described earlier)
+
+
+    Pros -> simple- just check for each user, if the job tags are satisfied or not
+    Cons -> too slow- need to check for each user and for each user, need to check entire list in worst case( can sort the list for by company name, etc- but still can be complete list scan in worst case)
+
+
+
+    -> Storage strategy 2
+    each company has around 20-30( worst case) locations and 50-60 role names -> so total of 1000*30*60 = 1800000 possible combination.
+    These combinations, we can find from the data- whenever there is a job and its combination is not there, just update there.
+
+    Preference table
+    combination -> list of users interested in this combination
+
+    When a user select all combination, we will add it into all possible companies and other combinations as per his preference
+
+    Much faster -> single row read will give all the users.
+
+
+
+
+
+=> For minimal viable product -> we can go with approach 1
+
+
+    More works needs -> db size needed ( based on calculations).
+    More pros and cons based on reads and writes and storage costs,
+
+
+
+
+
+
+=> If we restrict user choices - then it can be made simple
+User must select some roles ( SDE1, SDE2, etc or any other combination or all or None)
+User must select some locations ( all location or any combination or None)
+
+
+once user have base preferences ( roles and locations)
+for each role-location combination -> user can select list of companies
+
+For MVP- going with approach
+
+
+
+
+
+
+new solution -> for each user * possible roles * possible location -> store bitset like structure for all the companies.
+
+
+
+
+
+
+In future - will create some group of companies ( based on pay range or some other parameters), so that user can subscribe to all of them at once, instead of subscribing one at a time

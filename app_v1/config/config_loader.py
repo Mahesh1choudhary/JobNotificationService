@@ -3,7 +3,7 @@ from typing import Union, Type, TypeVar
 from enum import Enum
 
 from app_v1.commons.service_logger import setup_logger
-from app_v1.config.config_classes import EnvironmentConfigClass
+from app_v1.config.config_classes_and_constants import EnvironmentConfigClass
 
 logger = setup_logger()
 T = TypeVar("T")
@@ -27,7 +27,10 @@ def fetch_key_value(key:Union[str,Enum], value_model: Type[T]) -> T:
 
     try:
         result = data[key]
-        return value_model(**result)
+        if isinstance(result, dict):
+            return value_model(**result)
+        else:
+            return value_model(result)
     except Exception as e:
         logger.error(f"Key: {key} not found in config_data_file_path", exc_info=True)
         raise ValueError(f"Key: {key} not found in config_data_file_path")

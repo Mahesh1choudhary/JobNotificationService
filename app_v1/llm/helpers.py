@@ -23,7 +23,7 @@ async def call_llm_with_retry(
                 model=llm_model.get_model_name(),
                 response_model=response_model,
                 messages=messages,
-                max_retries=0 #Disabling here, as handled on function level
+                max_retries=0 #Disabling here, as handled on function level by tenacity
             )
         except Exception as e:
             raise
