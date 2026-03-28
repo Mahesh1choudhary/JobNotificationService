@@ -23,7 +23,9 @@ class JobModel(Base):
 
     created_at = Column(DateTime)
 
-    __table_args__ = (
+    status = Column[str](String, nullable=False, default="pending")
+
+__table_args__ = (
         UniqueConstraint('company', 'job_link', 'description_hash', name='uq_job_unique'),
     )
 
