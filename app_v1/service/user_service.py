@@ -14,6 +14,7 @@ class UserService():
 
     async def create_new_user(self, user_creation_request:UserCreationRequest):
         try:
+            #TODO: should it be on user_name - in db, currently user_name made unique. Need to discuss
             existing_user:User = await self._user_repository.find_by_user_name(user_creation_request.user_name)
             if existing_user:
                 raise ValueError(f"Username: {user_creation_request.user_name} already exists")

@@ -1,0 +1,8 @@
+
+
+1-> Cache layer - should be modular. For now will use in-memory
+
+2 -> Guardrail limiting per user  -> number of request to user based on his token/limit
+
+3 -> RAG to select most related company name, location ,etc to agent, so that it does not generate something that is not present yet
+    Need to discuss more on this.

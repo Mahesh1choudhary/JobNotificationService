@@ -4,7 +4,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 
 from app_v1.commons.service_logger import setup_logger
 from app_v1.controller.dependency.dependency_functions import get_user_preferences_service
-from app_v1.models.request_models.user_preference_add_request import UserPreferenceRequest
+from app_v1.models.request_models.user_preference_request import UserPreferenceRequest
 from app_v1.service.user_preferences_service import UserPreferencesService
 
 router = APIRouter(prefix="/user_preferences")

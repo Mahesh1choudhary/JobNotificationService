@@ -18,7 +18,23 @@ CREATE TABLE IF NOT EXISTS users (
     user_id SERIAL PRIMARY KEY,
     user_name VARCHAR(255) UNIQUE NOT NULL,
     user_email VARCHAR(255) UNIQUE NOT NULL,
+    user_telegram_user_name TEXT UNIQUE NOT NULL,
+    user_telegram_chat_id BIGINT
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
---- by default index on user_id, user_name and email
+--- by default index on user_id, user_name, user_telegram_user_name and email
+
+
+
+---3 job notification target table
+CREATE TABLE IF NOT EXISTS job_notification_targets (
+    id SERIAL PRIMARY KEY,
+    job_role_name TEXT NOT NULL,
+    job_location TEXT NOT NULL,
+    company_name TEXT NOT NULL,
+    user_ids INT[] NOT NULL DEFAULT '{}',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(job_role_name, job_location, company_name)
+
+)
