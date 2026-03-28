@@ -107,11 +107,13 @@ class PostgresSQLDatabaseClient(BaseDatabaseClient):
 
 
     async def fetch(self, query:str, *args):
+        # returns all rows
         async with self.get_connection() as conn:
             return await conn.fetch(query, *args)
 
 
     async def fetchrow(self, query:str, *args):
+        # returns first row
         async with self.get_connection() as conn:
             return await conn.fetchrow(query, *args)
 

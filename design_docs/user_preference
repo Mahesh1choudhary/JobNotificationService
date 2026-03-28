@@ -79,12 +79,13 @@ So a user can select any combination.
 => If we restrict user choices - then it can be made simple
 User must select some roles ( SDE1, SDE2, etc or any other combination or all or None)
 User must select some locations ( all location or any combination or None)
+user must select companies.
+
+When a new job comes, first check role, then list of locations , and then companies
 
 
 once user have base preferences ( roles and locations)
 for each role-location combination -> user can select list of companies
-
-For MVP- going with approach
 
 
 
@@ -99,3 +100,13 @@ new solution -> for each user * possible roles * possible location -> store bits
 
 
 In future - will create some group of companies ( based on pay range or some other parameters), so that user can subscribe to all of them at once, instead of subscribing one at a time
+
+
+
+
+
+
+
+Final Approach
+
+job_name * locations * company_names -> List of users interested in this combination
