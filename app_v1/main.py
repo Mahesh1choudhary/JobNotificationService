@@ -6,6 +6,8 @@ import uvicorn
 
 from pathlib import Path
 import logging
+
+from app_v1.commons.service_logger import setup_logger
 # call startup helper to ensure compressed resources exist
 from startup import ensure_compressed  # type: ignore
 
@@ -20,6 +22,7 @@ from app_v1.service.greenhouse_job_polling_service import (
     polling_enabled_from_env,
 )
 
+logger = setup_logger()
 
 @asynccontextmanager
 async def lifespan(app:FastAPI):
@@ -43,9 +46,10 @@ async def lifespan(app:FastAPI):
     app.state.database_manager = database_manager
 
     poll_task: asyncio.Task | None = None
-    if polling_enabled_from_env():
+    if True:
         resources_dir = Path(__file__).resolve().parent / "resources"
         compressed_path = resources_dir / "greenhouse_clients_compressed.json"
+        logger.info(compressed_path)
         job_repo = JobRepository(database_manager.database_client)
         poller = GreenhouseJobPollingService(
             job_repo,
@@ -53,6 +57,7 @@ async def lifespan(app:FastAPI):
             poll_interval_seconds=poll_interval_from_env(),
         )
         poll_task = asyncio.create_task(poller.run_forever())
+        logger.info("Created task for polling")
         app.state.greenhouse_poll_task = poll_task
 
     yield

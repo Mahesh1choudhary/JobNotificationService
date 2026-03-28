@@ -29,7 +29,7 @@ class GreenhouseJobPollingService:
         compressed_json_path: Path | str | None = None,
         *,
         http_timeout: int = 10,
-        poll_interval_seconds: float = 3600.0,
+        poll_interval_seconds: float = 30.0,
         max_retries: int = 3,
     ):
         self._job_repository = job_repository
@@ -71,6 +71,8 @@ class GreenhouseJobPollingService:
             try:
                 resp = requests.get(url, timeout=self._http_timeout)
                 if resp.status_code == 200:
+                    logger.debug("Retrieved board for token %s", board_token)
+                    logger.info(resp.json())
                     return resp.json()
                 if resp.status_code == 404:
                     logger.debug("No board for token %s (404)", board_token)
@@ -120,6 +122,7 @@ class GreenhouseJobPollingService:
                 continue
             all_rows.extend(self._rows_for_board(token, payload))
         if all_rows:
+            logger.info(all_rows)
             n = await self._job_repository.insert_jobs_ignore_duplicates(all_rows)
             logger.info("Poll cycle: submitted %s job rows for insert", n)
 
