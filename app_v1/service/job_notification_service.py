@@ -7,7 +7,7 @@ from app_v1.database.database_client import BaseDatabaseClient
 from app_v1.database.database_config import DatabaseConfigFactory
 from app_v1.database.database_manager import DatabaseManager
 from app_v1.llm.llm_manager import LLMManager
-from app_v1.llm.llm_model.gpt5_1_llm_model import GPT51LLMModel
+from app_v1.llm.llm_model.gpt4o_mini_llm_model import GPT4OMiniLLMModel
 from app_v1.models.data_models.job_tag_response import JobTagResponse
 from app_v1.service.notification_service.notification_service import NotificationService
 from app_v1.service.notification_service.notification_service_helpers.event_bus import EventBus

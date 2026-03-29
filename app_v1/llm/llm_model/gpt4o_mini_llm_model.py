@@ -8,11 +8,11 @@ from app_v1.llm.llm_model.base_llm_model import LLMModel
 
 logger = setup_logger()
 
-class GPT51LLMModel(LLMModel):
+class GPT4OMiniLLMModel(LLMModel):
 
     def __init__(self):
         self.temperature: int =0
-        self.llm_model_name: str = "gpt-5.1"
+        self.llm_model_name: str = "gpt-4o-mini"
         self.time_out_seconds: int = 30
 
     def get_model_name(self) -> str:
@@ -43,6 +43,9 @@ class GPT51LLMModel(LLMModel):
             - `job_location`: string -> Location of the job. Should be city name, Country name or remote if applicable
             - `job_department`: string -> Department based on job work. Examples- Engineering, Sales, Finance, etc
             - `job_role_name`: string -> Name of the job. Examples: SDE 1, SDE 2, Staff Engineer, Customer Success Manager, etc
+            - `job_summary`: string -> 4-5 lines summary about the job
+                - It should include info about the tech stack if present in job description: programming langauges, frameworks, databases, etc
+                - It should contain year of experience if present in job description
             
         ### Input:
         - `job_description`: {job_description}
@@ -53,10 +56,11 @@ class GPT51LLMModel(LLMModel):
         
         ### Output:
         {{
-            "job_company_name": `job_company_name`
-            "job_experience_level": `job_experience_level`
-            "job_location": `job_location`
-            "job_department": `job_department`
-            "job_role_name": `job_role_name`
+            "job_company_name": `job_company_name`,
+            "job_experience_level": `job_experience_level`,
+            "job_location": `job_location`,
+            "job_department": `job_department`,
+            "job_role_name": `job_role_name`,
+            "job_summary": `job_summary`
         }}
         """

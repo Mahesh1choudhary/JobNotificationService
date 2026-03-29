@@ -6,3 +6,8 @@
 
 3 -> RAG to select most related company name, location ,etc to agent, so that it does not generate something that is not present yet
     Need to discuss more on this.
+    -> as per of this, need to ingest new combinations into db also, make sue, nothing is repeated and similar keywords should go into one( like bangalore and bengaluru)
+
+4 -> improve the final message format ( message to user)
+
+5 -> listening on telegram api to get user telegram chat ids and push then to db
