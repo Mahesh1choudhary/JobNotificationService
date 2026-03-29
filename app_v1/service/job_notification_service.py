@@ -52,3 +52,22 @@ class JobNotificationService:
         except Exception as exc:
             logger.error("Error in generate_tags_and_send_notifications", exc_info=True)
             raise
+
+
+async def  main():
+    llm_manager = LLMManager()
+    llm_manager.set_tag_generation_model(GPT4OMiniLLMModel())
+
+    database_config = DatabaseConfigFactory.create_database_config()
+    database_manager = DatabaseManager(database_config)
+    await database_manager.init()
+
+    job_notification_service = JobNotificationService(database_manager.database_client)
+    await job_notification_service.generate_tags_and_send_notifications("")
+
+    print("done")
+
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.get_event_loop().run_until_complete(main())

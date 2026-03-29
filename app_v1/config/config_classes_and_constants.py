@@ -14,3 +14,5 @@ class EnvironmentConfigClass(Enum):
 
 
 TELEGRAM_BOT_NAME = "JobNotificationSenderBot"
+
+DEFAULT_USER_NOTIFICATION_QUOTA = 100 # free number of notifications can be send to user

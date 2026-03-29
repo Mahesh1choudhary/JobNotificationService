@@ -6,3 +6,4 @@ class DatabaseTables(Enum):
     COMPANY_TABLE = 'companies'
     USER_TABLE = 'users'
     JOB_NOTIFICATION_TARGETS_TABLE = 'job_notification_targets'
+    USER_QUOTA_TABLE = 'user_quota'
