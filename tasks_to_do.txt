@@ -11,3 +11,5 @@
 4 -> improve the final message format ( message to user)
 
 5 -> listening on telegram api to get user telegram chat ids and push then to db
+
+6 -> doing proper logging

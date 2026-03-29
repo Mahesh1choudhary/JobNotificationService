@@ -38,3 +38,14 @@ CREATE TABLE IF NOT EXISTS job_notification_targets (
     UNIQUE(job_role_name, job_location, company_name)
 
 )
+
+
+
+---4 user quota table
+CREATE TABLE IF NOT EXISTS user_quota (
+    user_id INT PRIMARY KEY,
+    total_count INT NOT NULL CHECK (total_count >= 0),
+    used_count INT NOT NULL DEFAULT 0 CHECK (used_count >= 0)
+    CHECK (used_count <= total_count)
+)
+--- by default index on user_id
