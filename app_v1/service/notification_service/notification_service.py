@@ -21,12 +21,22 @@ class NotificationService():
     async def send_notification_to_targets(self, target_users: List[User], notification_message:str):
         #TODO: notification sender should be user specific when sending
 
+        #TODO: need to add concurrency control here -> otherwise async tasks can explode
+
+        rate_limit_tasks = [
+            self._notification_rate_limiter.allow_notification(user.user_id) for user in target_users
+        ]
+        rate_limit_task_results = await asyncio.gather(*rate_limit_tasks, return_exceptions=True)
+
+
         tasks = []
-        for user in target_users:
-            if self._notification_rate_limiter.allow_notification(user_id=user.user_id):
+        for user, notification_allowed in zip(target_users, rate_limit_task_results):
+            if isinstance(notification_allowed, bool) and notification_allowed:
                 #TODO: for now single check for all senders, need to change in future ans different senders has different cost. ALso one sender ot two sender have same check is not a equality
                 for sender in self._notification_senders:
                     tasks.append(sender.send_notification(user, notification_message))
+            elif isinstance(notification_allowed, Exception):
+                logger.error(f"Failed to check quota for user: {user.user_name} with error : {notification_allowed}")
             else:
                 logger.info(f"Sending Notification not allowed for user: {user.user_name}")
 

@@ -45,29 +45,18 @@ class JobNotificationService:
     async def generate_tags_and_send_notifications(self, job_content: str):
         try:
             job_tag_response:JobTagResponse = await self.generate_tags(job_content)
+            #TODO: how to generate job link -> from llm only or can get from job_content?
+            #TODO: For now single structure for all senders- telegram whatsapp, etc. Also need to add job link here also
+            notification_message: str = f"""
+                Job Role Name : {job_tag_response.job_role_name}
+                Job Location : {job_tag_response.job_location}
+                Job Company Name : {job_tag_response.job_company_name}
+                Job Experience Level : {job_tag_response.job_experience_level}
+                Job Summary : {job_tag_response.job_summary}
+            """
 
-            #TODO: for now sending whole job_content as notification, update the structure
-            job_event = JobEvent(event_type=EventType.JOB_EVENT, job_tag_response=job_tag_response, job_notification_message= job_content)
+            job_event = JobEvent(event_type=EventType.JOB_EVENT, job_tag_response=job_tag_response, job_notification_message= notification_message)
             await self._event_publisher.publish(job_event)
         except Exception as exc:
             logger.error("Error in generate_tags_and_send_notifications", exc_info=True)
             raise
-
-
-async def  main():
-    llm_manager = LLMManager()
-    llm_manager.set_tag_generation_model(GPT4OMiniLLMModel())
-
-    database_config = DatabaseConfigFactory.create_database_config()
-    database_manager = DatabaseManager(database_config)
-    await database_manager.init()
-
-    job_notification_service = JobNotificationService(database_manager.database_client)
-    await job_notification_service.generate_tags_and_send_notifications("")
-
-    print("done")
-
-
-if __name__ == "__main__":
-    import asyncio
-    asyncio.get_event_loop().run_until_complete(main())

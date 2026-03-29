@@ -14,7 +14,7 @@ class UserQuotaRepository:
 
     async def allow_if_possible(self, user_id:int) -> bool:
         query = f"""
-                UPDATE {DatabaseTables.USER_QUOTA}
+                UPDATE {DatabaseTables.USER_QUOTA_TABLE.value}
                 SET used_count = used_count + 1
                 WHERE user_id = $1
                   AND used_count < total_count
@@ -30,7 +30,7 @@ class UserQuotaRepository:
 
     async def reset_user_notification_quota(self, user_id:int, new_quota:int):
         query = f"""
-                UPDATE {DatabaseTables.USER_QUOTA_TABLE}
+                UPDATE {DatabaseTables.USER_QUOTA_TABLE.value}
                 SET total_count = $2,
                     used_count = 0
                 WHERE user_id = $1
@@ -44,7 +44,7 @@ class UserQuotaRepository:
 
     async def create_if_not_exists(self, user_id:int, user_quota:int):
         query = f"""
-            INSERT INTO user_quota (user_id, total_count, used_count)
+            INSERT INTO {DatabaseTables.USER_QUOTA_TABLE.value} (user_id, total_count, used_count)
             VALUES ($1, $2, 0)
             ON CONFLICT (user_id) DO NOTHING;
             """
