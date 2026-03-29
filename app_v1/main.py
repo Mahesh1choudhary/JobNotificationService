@@ -6,7 +6,7 @@ import uvicorn
 from app_v1.database.database_config import DatabaseConfigFactory
 from app_v1.database.database_manager import DatabaseManager
 from app_v1.llm.llm_manager import LLMManager
-from app_v1.llm.llm_model.gpt5_1_llm_model import GPT51LLMModel
+from app_v1.llm.llm_model.gpt4o_mini_llm_model import GPT4OMiniLLMModel
 from app_v1.controller.user_controller import user_router
 
 
@@ -14,7 +14,7 @@ from app_v1.controller.user_controller import user_router
 async def lifespan(app:FastAPI):
     # setting llm manager and creating database instance
     llm_manager = LLMManager()
-    llm_manager.set_tag_generation_model(GPT51LLMModel())
+    llm_manager.set_tag_generation_model(GPT4OMiniLLMModel())
 
     database_config = DatabaseConfigFactory.create_database_config()
     database_manager = DatabaseManager(database_config)

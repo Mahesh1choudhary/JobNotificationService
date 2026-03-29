@@ -9,6 +9,7 @@ class JobTagResponse(BaseModel):
     job_location: str # job location -> Bangalore, New York , remote, etc
     job_department: str # Engineering, sales, finance, etc
     job_role_name: str # SDE1, Staff Engineer, customer success manager, etc
+    job_summary: str # 4-5 lines about the job -> tech stack , year of experience etc.
 
 
 
