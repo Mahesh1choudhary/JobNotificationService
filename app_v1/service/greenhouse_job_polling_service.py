@@ -14,7 +14,7 @@ from app_v1.database.repository.job_repository import JobInsertRow, JobRepositor
 logger = setup_logger()
 
 GH_JOBS_URL = "https://boards-api.greenhouse.io/v1/boards/{companyName}/jobs?content=true"
-DEFAULT_COMPRESSED_PATH = Path(__file__).resolve().parent.parent / "resources" / "greenhouse_clients_compressed.json"
+DEFAULT_COMPRESSED_PATH = Path(__file__).resolve().parent.parent / "config" / "greenhouse_clients_compressed.json"
 DEFAULT_WHITELIST_PATH = Path(__file__).resolve().parent.parent / "config" / "whitelist_companies.json"
 
 
@@ -95,7 +95,6 @@ class GreenhouseJobPollingService:
                 resp = requests.get(url, timeout=self._http_timeout)
                 if resp.status_code == 200:
                     logger.debug("Retrieved board for token %s", board_token)
-                    logger.info(resp.json())
                     return resp.json()
                 if resp.status_code == 404:
                     logger.debug("No board for token %s (404)", board_token)
@@ -145,7 +144,7 @@ class GreenhouseJobPollingService:
                 continue
             all_rows.extend(self._rows_for_board(token, payload))
         if all_rows:
-            logger.info(all_rows)
+            logger.info(len(all_rows))
             n = await self._job_repository.insert_jobs_ignore_duplicates(all_rows)
             logger.info("Poll cycle: submitted %s job rows for insert", n)
 

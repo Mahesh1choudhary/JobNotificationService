@@ -10,7 +10,7 @@ import logging
 
 from app_v1.commons.service_logger import setup_logger
 # call startup helper to ensure compressed resources exist
-from startup import ensure_compressed  # type: ignore
+# from startup import ensure_compressed  # type: ignore
 
 from app_v1.database.database_config import DatabaseConfigFactory
 from app_v1.database.database_manager import DatabaseManager
@@ -29,13 +29,13 @@ logger = setup_logger()
 @asynccontextmanager
 async def lifespan(app:FastAPI):
     # ensure compressed greenhouse JSON exists before initializing other services
-    try:
-        resources_dir = Path(__file__).resolve().parent / "resources"
-        print(resources_dir)
-        ensure_compressed(resources_dir=resources_dir)
-
-    except Exception:
-        logging.exception("ensure_compressed failed during app startup; continuing startup.")
+    # try:
+    #     resources_dir = Path(__file__).resolve().parent / "config"
+    #     print(resources_dir)
+    #     ensure_compressed(resources_dir=resources_dir)
+    #
+    # except Exception:
+    #     logging.exception("ensure_compressed failed during app startup; continuing startup.")
 
     # setting llm manager and creating database instance
     llm_manager = LLMManager()
