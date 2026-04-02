@@ -4,6 +4,7 @@ from typing import Literal
 from pydantic import BaseModel
 
 from app_v1.models.data_models.job_tag_response import JobTagResponse
+from app_v1.service.notification_service.notification_service_helpers.notification_payload import JobNotificationPayload
 
 
 class EventType(str, Enum):
@@ -17,5 +18,5 @@ class BaseEvent(BaseModel):
 class JobEvent(BaseEvent):
     event_type: Literal[EventType.JOB_EVENT] = EventType.JOB_EVENT
     job_tag_response: JobTagResponse
-    job_notification_message: str
+    job_notification_payload: JobNotificationPayload
 
