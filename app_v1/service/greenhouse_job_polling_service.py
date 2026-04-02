@@ -15,12 +15,14 @@ logger = setup_logger()
 
 GH_JOBS_URL = "https://boards-api.greenhouse.io/v1/boards/{companyName}/jobs?content=true"
 DEFAULT_COMPRESSED_PATH = Path(__file__).resolve().parent.parent / "resources" / "greenhouse_clients_compressed.json"
+DEFAULT_WHITELIST_PATH = Path(__file__).resolve().parent.parent / "config" / "whitelist_companies.json"
 
 
 class GreenhouseJobPollingService:
     """
     Periodically loads board tokens from compressed Greenhouse client JSON (domain → slug),
-    fetches public job listings, and stores rows via JobRepository.
+    intersects them with whitelist_companies.json, fetches public job listings for those boards,
+    and stores rows via JobRepository.
     """
 
     def __init__(
@@ -28,12 +30,14 @@ class GreenhouseJobPollingService:
         job_repository: JobRepository,
         compressed_json_path: Path | str | None = None,
         *,
+        whitelist_json_path: Path | str | None = None,
         http_timeout: int = 10,
         poll_interval_seconds: float = 30.0,
         max_retries: int = 3,
     ):
         self._job_repository = job_repository
         self._compressed_path = Path(compressed_json_path or DEFAULT_COMPRESSED_PATH)
+        self._whitelist_path = Path(whitelist_json_path or DEFAULT_WHITELIST_PATH)
         self._http_timeout = http_timeout
         self._poll_interval_seconds = poll_interval_seconds
         self._max_retries = max_retries
@@ -51,6 +55,18 @@ class GreenhouseJobPollingService:
             d = d.split(".")[0]
         return d
 
+    def _load_whitelist_tokens(self) -> set[str]:
+        if not self._whitelist_path.is_file():
+            logger.error("Whitelist JSON not found: %s", self._whitelist_path)
+            return set()
+        with open(self._whitelist_path, encoding="utf-8") as f:
+            obj = json.load(f)
+        raw = obj.get("companies")
+        if not isinstance(raw, list):
+            logger.error("Whitelist JSON must contain a 'companies' array: %s", self._whitelist_path)
+            return set()
+        return {str(name).strip().lower() for name in raw if str(name).strip()}
+
     def _load_board_tokens(self) -> list[str]:
         if not self._compressed_path.is_file():
             logger.error("Greenhouse compressed JSON not found: %s", self._compressed_path)
@@ -63,6 +79,13 @@ class GreenhouseJobPollingService:
             if not domain:
                 continue
             tokens.add(self.board_token_from_domain(domain))
+        whitelist = self._load_whitelist_tokens()
+        if not whitelist:
+            logger.warning("Whitelist is empty or invalid; skipping poll cycle")
+            return []
+        before = len(tokens)
+        tokens = {t for t in tokens if t in whitelist}
+        logger.debug("Board tokens after whitelist: %s of %s from compressed JSON", len(tokens), before)
         return sorted(tokens)
 
     def _fetch_jobs_payload(self, board_token: str) -> dict[str, Any] | None:
@@ -139,7 +162,7 @@ def polling_enabled_from_env() -> bool:
     return os.getenv("GREENHOUSE_POLLING_ENABLED", "").strip().lower() in ("1", "true", "yes", "on")
 
 
-def poll_interval_from_env(default: float = 3600.0) -> float:
+def poll_interval_from_env(default: float = 360.0) -> float:
     raw = os.getenv("GREENHOUSE_POLL_INTERVAL_SECONDS")
     if not raw:
         return default
