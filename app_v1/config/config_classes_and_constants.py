@@ -11,3 +11,8 @@ class DatabaseWrapperConfig(BaseModel):
 
 class EnvironmentConfigClass(Enum):
     ENV = "ENV"
+
+
+TELEGRAM_BOT_NAME = "JobNotificationSenderBot"
+
+DEFAULT_USER_NOTIFICATION_QUOTA = 100 # free number of notifications can be send to user

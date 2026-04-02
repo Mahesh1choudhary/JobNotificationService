@@ -3,7 +3,7 @@ from typing import Dict, ClassVar, Any, Type
 from pydantic import BaseModel, ConfigDict
 
 from app_v1.commons.service_logger import setup_logger
-from app_v1.config.config_classes import DatabaseWrapperConfig
+from app_v1.config.config_classes_and_constants import DatabaseWrapperConfig
 from app_v1.config.config_loader import fetch_key_value
 from app_v1.config.config_keys import DATABASE_CONFIG_KEY
 
