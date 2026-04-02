@@ -184,6 +184,11 @@
       "name": "Twilio",
       "domain": "twilio.com",
       "linkedin_url": "https://www.linkedin.com/company/twilio-inc-/"
+    },
+    {
+      "name": "Rubrik",
+      "domain": "rubrik.com",
+      "linkedin_url": "https://www.linkedin.com/company/rubrik/"
     }
   ]
 }

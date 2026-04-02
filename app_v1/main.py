@@ -4,9 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 import uvicorn
 
-from app_v1.database.database_config import DatabaseConfigFactory
 from pathlib import Path
-import logging
 
 from app_v1.commons.service_logger import setup_logger
 # call startup helper to ensure compressed resources exist
@@ -21,21 +19,12 @@ from app_v1.database.repository.job_repository import JobRepository
 from app_v1.service.greenhouse_job_polling_service import (
     GreenhouseJobPollingService,
     poll_interval_from_env,
-    polling_enabled_from_env,
 )
 
 logger = setup_logger()
 
 @asynccontextmanager
 async def lifespan(app:FastAPI):
-    # ensure compressed greenhouse JSON exists before initializing other services
-    # try:
-    #     resources_dir = Path(__file__).resolve().parent / "config"
-    #     print(resources_dir)
-    #     ensure_compressed(resources_dir=resources_dir)
-    #
-    # except Exception:
-    #     logging.exception("ensure_compressed failed during app startup; continuing startup.")
 
     # setting llm manager and creating database instance
     llm_manager = LLMManager()
@@ -48,19 +37,18 @@ async def lifespan(app:FastAPI):
     app.state.database_manager = database_manager #will be used in dependency injections
 
     poll_task: asyncio.Task | None = None
-    if True:
-        resources_dir = Path(__file__).resolve().parent / "resources"
-        compressed_path = resources_dir / "greenhouse_clients_compressed.json"
-        logger.info(compressed_path)
-        job_repo = JobRepository(database_manager.database_client)
-        poller = GreenhouseJobPollingService(
-            job_repo,
-            compressed_json_path=compressed_path,
-            poll_interval_seconds=poll_interval_from_env(),
-        )
-        poll_task = asyncio.create_task(poller.run_forever())
-        logger.info("Created task for polling")
-        app.state.greenhouse_poll_task = poll_task
+    resources_dir = Path(__file__).resolve().parent / "config"
+    compressed_path = resources_dir / "greenhouse_clients_compressed.json"
+    logger.info(compressed_path)
+    job_repo = JobRepository(database_manager.database_client)
+    poller = GreenhouseJobPollingService(
+        job_repo,
+        compressed_json_path=compressed_path,
+        poll_interval_seconds=poll_interval_from_env(),
+    )
+    poll_task = asyncio.create_task(poller.run_forever())
+    logger.info("Created task for polling")
+    app.state.greenhouse_poll_task = poll_task
 
     yield
 
