@@ -17,7 +17,6 @@ from app_v1.database.database_manager import DatabaseManager
 from app_v1.llm.llm_manager import LLMManager
 from app_v1.llm.llm_model.gpt4o_mini_llm_model import GPT4OMiniLLMModel
 from app_v1.controller.user_controller import user_router
-from app_v1.llm.llm_model.gpt5_1_llm_model import GPT51LLMModel
 from app_v1.database.repository.job_repository import JobRepository
 from app_v1.service.greenhouse_job_polling_service import (
     GreenhouseJobPollingService,
