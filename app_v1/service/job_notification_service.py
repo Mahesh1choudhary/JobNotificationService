@@ -14,6 +14,7 @@ from app_v1.service.notification_service.notification_service_helpers.event_bus 
 from app_v1.service.notification_service.notification_service_helpers.event_handlers import JobEventHandler
 from app_v1.service.notification_service.notification_service_helpers.event_models import EventType, JobEvent
 from app_v1.service.notification_service.notification_service_helpers.event_publishers import InMemoryEventPublisher
+from app_v1.service.notification_service.notification_service_helpers.notification_payload import JobNotificationPayload
 
 logger = setup_logger()
 
@@ -46,16 +47,9 @@ class JobNotificationService:
         try:
             job_tag_response:JobTagResponse = await self.generate_tags(job_content)
             #TODO: how to generate job link -> from llm only or can get from job_content?
-            #TODO: For now single structure for all senders- telegram whatsapp, etc. Also need to add job link here also
-            notification_message: str = f"""
-                Job Role Name : {job_tag_response.job_role_name}
-                Job Location : {job_tag_response.job_location}
-                Job Company Name : {job_tag_response.job_company_name}
-                Job Experience Level : {job_tag_response.job_experience_level}
-                Job Summary : {job_tag_response.job_summary}
-            """
+            notification_payload = JobNotificationPayload(**job_tag_response.model_dump())
 
-            job_event = JobEvent(event_type=EventType.JOB_EVENT, job_tag_response=job_tag_response, job_notification_message= notification_message)
+            job_event = JobEvent(event_type=EventType.JOB_EVENT, job_tag_response=job_tag_response, job_notification_payload= notification_payload)
             await self._event_publisher.publish(job_event)
         except Exception as exc:
             logger.error("Error in generate_tags_and_send_notifications", exc_info=True)

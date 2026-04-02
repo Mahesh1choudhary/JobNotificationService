@@ -23,7 +23,7 @@ class JobEventHandler(BaseEventHandler):
         try:
             target_users: list[User] = await self._job_notification_targets_service.find_job_notification_target_users(event.job_tag_response)
 
-            await self._notification_service.send_notification_to_targets(target_users= target_users, notification_message= event.job_notification_message)
+            await self._notification_service.send_notification_to_targets(target_users= target_users, notification_payload= event.job_notification_payload)
         except Exception as exc:
             logger.error("Error handling JobEvent", exc_info=True)
             raise

@@ -5,6 +5,8 @@ from app_v1.commons.service_logger import setup_logger
 from app_v1.database.database_client import BaseDatabaseClient
 from app_v1.database.database_models.user import User
 from app_v1.database.repository.job_notification_target_repository import JobNotificationTargetRepository
+from app_v1.service.notification_service.notification_service_helpers.notification_payload import \
+    BaseNotificationPayload
 from app_v1.service.notification_service.notification_service_helpers.notification_sender import NotificationSender, \
      TelegramNotificationSender
 from app_v1.service.rate_limit_service import RateLimitService
@@ -18,7 +20,7 @@ class NotificationService():
         self._notification_rate_limiter = RateLimitService(database_client)
 
 
-    async def send_notification_to_targets(self, target_users: List[User], notification_message:str):
+    async def send_notification_to_targets(self, target_users: List[User], notification_payload:BaseNotificationPayload):
         #TODO: notification sender should be user specific when sending
 
         #TODO: need to add concurrency control here -> otherwise async tasks can explode
@@ -34,7 +36,7 @@ class NotificationService():
             if isinstance(notification_allowed, bool) and notification_allowed:
                 #TODO: for now single check for all senders, need to change in future ans different senders has different cost. ALso one sender ot two sender have same check is not a equality
                 for sender in self._notification_senders:
-                    tasks.append(sender.send_notification(user, notification_message))
+                    tasks.append(sender.send_notification(user, notification_payload))
             elif isinstance(notification_allowed, Exception):
                 logger.error(f"Failed to check quota for user: {user.user_name} with error : {notification_allowed}")
             else:
