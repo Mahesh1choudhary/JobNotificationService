@@ -1,194 +1,33 @@
 {
   "data": [
-    {
-      "name": "EY",
-      "domain": "ey.com",
-      "linkedin_url": "https://www.linkedin.com/company/ernstandyoung/"
-    },
-    {
-      "name": "Varsity Tutors, a Nerdy Company",
-      "domain": "varsitytutors.com",
-      "linkedin_url": "https://www.linkedin.com/company/varsity-tutors/"
-    },
-    {
-      "name": "BAYADA Home Health Care",
-      "domain": "bayada.com",
-      "linkedin_url": "https://www.linkedin.com/company/bayada-home-health-care/"
-    },
-    {
-      "name": "Lakefield Veterinary Group",
-      "domain": "lakefieldvet.com",
-      "linkedin_url": "https://www.linkedin.com/company/lakefield-veterinary-group/"
-    },
-    {
-      "name": "Compass Group",
-      "domain": "compass-group.com",
-      "linkedin_url": "https://www.linkedin.com/company/compass-group/"
-    },
-    {
-      "name": "PandoLogic",
-      "domain": "pandologic.com",
-      "linkedin_url": "https://www.linkedin.com/company/pandologic/"
-    },
-    {
-      "name": "Mondelēz International",
-      "domain": "mondelezinternational.com",
-      "linkedin_url": "https://www.linkedin.com/company/mondelezinternational/"
-    },
-    {
-      "name": "Agoda",
-      "domain": "careersatagoda.com",
-      "linkedin_url": "https://www.linkedin.com/company/agoda/"
-    },
-    {
-      "name": "Shopee",
-      "domain": "shopee.com",
-      "linkedin_url": "https://www.linkedin.com/company/shopee/"
-    },
-    {
-      "name": "SpaceX",
-      "domain": "spacex.com",
-      "linkedin_url": "https://www.linkedin.com/company/spacex/"
-    },
-    {
-      "name": "Asset Living",
-      "domain": "assetliving.com",
-      "linkedin_url": "https://www.linkedin.com/company/asset-living/"
-    },
-    {
-      "name": "Carvana",
-      "domain": "carvana.com",
-      "linkedin_url": "https://www.linkedin.com/company/carvana/"
-    },
-    {
-      "name": "Meridial Marketplace, by Invisible",
-      "domain": "meridial.ai",
-      "linkedin_url": "https://www.linkedin.com/company/meridial-marketplace/"
-    },
-    {
-      "name": "Canonical",
-      "domain": "canonical.com",
-      "linkedin_url": "https://www.linkedin.com/company/canonical/"
-    },
-    {
-      "name": "Engie",
-      "domain": "engie.com",
-      "linkedin_url": "https://www.linkedin.com/company/engie/"
-    },
-    {
-      "name": "Kuehne+Nagel",
-      "domain": "kuehne-nagel.com",
-      "linkedin_url": "https://www.linkedin.com/company/kuehne-nagel/"
-    },
-    {
-      "name": "Okta",
-      "domain": "okta.com",
-      "linkedin_url": "https://www.linkedin.com/company/okta-inc-/"
-    },
-    {
-      "name": "Warby Parker",
-      "domain": "warbyparker.com",
-      "linkedin_url": "https://www.linkedin.com/company/warbyparker/"
-    },
-    {
-      "name": "Afterpay",
-      "domain": "afterpay.com",
-      "linkedin_url": "https://www.linkedin.com/company/afterpay-com-au/"
-    },
-    {
-      "name": "HelloFresh",
-      "domain": "hellofresh.com",
-      "linkedin_url": "https://www.linkedin.com/company/hellofresh/"
-    },
-    {
-      "name": "Outlier AI",
-      "domain": "outlier.ai",
-      "linkedin_url": "https://www.linkedin.com/company/outlier-ai/"
-    },
-    {
-      "name": "DoorDash",
-      "domain": "doordash.com",
-      "linkedin_url": "https://www.linkedin.com/company/doordash/"
-    },
-    {
-      "name": "Lucid Motors",
-      "domain": "lucidmotors.com",
-      "linkedin_url": "https://www.linkedin.com/company/lucidmotors/"
-    },
-    {
-      "name": "Ambiq",
-      "domain": "ambiq.com",
-      "linkedin_url": "https://www.linkedin.com/company/ambiqmicro/"
-    },
-    {
-      "name": "Kuehne+Nagel",
-      "domain": "kuehne-nagel.com",
-      "linkedin_url": "https://www.linkedin.com/company/kuehne-nagel/"
-    },
-    {
-      "name": "Okta",
-      "domain": "okta.com",
-      "linkedin_url": "https://www.linkedin.com/company/okta-inc-/"
-    },
-    {
-      "name": "Warby Parker",
-      "domain": "warbyparker.com",
-      "linkedin_url": "https://www.linkedin.com/company/warbyparker/"
-    },
-    {
-      "name": "Afterpay",
-      "domain": "afterpay.com",
-      "linkedin_url": "https://www.linkedin.com/company/afterpay-com-au/"
-    },
-    {
-      "name": "HelloFresh",
-      "domain": "hellofresh.com",
-      "linkedin_url": "https://www.linkedin.com/company/hellofresh/"
-    },
-    {
-      "name": "Outlier AI",
-      "domain": "outlier.ai",
-      "linkedin_url": "https://www.linkedin.com/company/outlier-ai/"
-    },
-    {
-      "name": "DoorDash",
-      "domain": "doordash.com",
-      "linkedin_url": "https://www.linkedin.com/company/doordash/"
-    },
-    {
-      "name": "Lucid Motors",
-      "domain": "lucidmotors.com",
-      "linkedin_url": "https://www.linkedin.com/company/lucidmotors/"
-    },
-    {
-      "name": "Ambiq",
-      "domain": "ambiq.com",
-      "linkedin_url": "https://www.linkedin.com/company/ambiqmicro/"
-    },
-    {
-      "name": "Databricks",
-      "domain": "databricks.com",
-      "linkedin_url": "https://www.linkedin.com/company/databricks/"
-    },
-    {
-      "name": "Capco",
-      "domain": "capco.com",
-      "linkedin_url": "https://www.linkedin.com/company/capco/"
-    },
-    {
-      "name": "Dexian",
-      "domain": "dexian.com",
-      "linkedin_url": "https://www.linkedin.com/company/dexiansolutions/"
-    },
-    {
-      "name": "Twilio",
-      "domain": "twilio.com",
-      "linkedin_url": "https://www.linkedin.com/company/twilio-inc-/"
-    },
-    {
-      "name": "Rubrik",
-      "domain": "rubrik.com",
-      "linkedin_url": "https://www.linkedin.com/company/rubrik/"
-    }
+    "ey",
+    "varsitytutors",
+    "bayada",
+    "lakefield",
+    "compass",
+    "pandologic",
+    "mondelezinternational",
+    "agoda",
+    "shopee",
+    "spacex",
+    "assetliving",
+    "carvana",
+    "meridial",
+    "canonical",
+    "engie",
+    "kuehnenagel",
+    "okta",
+    "warbyparker",
+    "afterpay",
+    "hellofresh",
+    "outlier",
+    "doordash",
+    "lucidmotors",
+    "ambiq",
+    "databricks",
+    "capco",
+    "dexian",
+    "twilio",
+    "rubrik"
   ]
 }

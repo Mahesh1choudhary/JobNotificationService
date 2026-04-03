@@ -21,9 +21,9 @@ DEFAULT_WHITELIST_PATH = Path(__file__).resolve().parent.parent / "config" / "wh
 
 class GreenhouseJobPollingService:
     """
-    Periodically loads board tokens from compressed Greenhouse client JSON (domain → slug),
-    intersects them with whitelist_companies.json, fetches public job listings for those boards,
-    and inserts each company's jobs to the database right after that company's response is received.
+    Loads board tokens from greenhouse_clients_compressed.json (`data`: list of Greenhouse board slugs),
+    keeps those present in whitelist_companies.json, fetches each board's public jobs API,
+    and inserts that company's jobs right after each response.
     """
 
     def __init__(
@@ -43,19 +43,6 @@ class GreenhouseJobPollingService:
         self._poll_interval_seconds = poll_interval_seconds
         self._max_retries = max_retries
 
-    @staticmethod
-    def board_token_from_domain(domain: str) -> str:
-        """Map a careers site domain to the Greenhouse boards API token (same rules as legacy importer)."""
-        d = domain.strip().lower()
-        if d.endswith(".com"):
-            d = d[:-4]
-        d = d.split("/")[0]
-        if d.startswith("www."):
-            d = d[4:]
-        if "." in d:
-            d = d.split(".")[0]
-        return d
-
     def _load_whitelist_tokens(self) -> set[str]:
         if not self._whitelist_path.is_file():
             logger.error("Whitelist JSON not found: %s", self._whitelist_path)
@@ -74,17 +61,24 @@ class GreenhouseJobPollingService:
             return []
         with open(self._compressed_path, encoding="utf-8") as f:
             obj = json.load(f)
+        raw = obj.get("data")
+        if not isinstance(raw, list):
+            logger.error(
+                "Greenhouse compressed JSON must have a 'data' array of board tokens: %s",
+                self._compressed_path,
+            )
+            return []
         tokens: set[str] = set()
-        for rec in obj.get("data", []):
-            domain = rec.get("domain")
-            if not domain:
+        for item in raw:
+            if not isinstance(item, str):
                 continue
-            tokens.add(self.board_token_from_domain(domain))
+            t = item.strip().lower()
+            if t:
+                tokens.add(t)
         whitelist = self._load_whitelist_tokens()
         if not whitelist:
             logger.warning("Whitelist is empty or invalid; skipping poll cycle")
             return []
-        before = len(tokens)
         tokens = {t for t in tokens if t in whitelist}
         return sorted(tokens)
 
