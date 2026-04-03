@@ -11,7 +11,6 @@ from app_v1.database.database_manager import DatabaseManager
 from app_v1.llm.llm_manager import LLMManager
 from app_v1.llm.llm_model.gpt4o_mini_llm_model import GPT4OMiniLLMModel
 from app_v1.controller.user_controller import user_router
-from app_v1.database.repository.job_repository import JobRepository
 from app_v1.service.greenhouse_job_polling_service import GreenhouseJobPollingService
 
 logger = setup_logger()
@@ -29,9 +28,7 @@ async def lifespan(app:FastAPI):
 
     app.state.database_manager = database_manager #will be used in dependency injections
 
-    poll_task: asyncio.Task | None = None
-    job_repo = JobRepository(database_manager.database_client)
-    poller = GreenhouseJobPollingService(job_repo)
+    poller = GreenhouseJobPollingService(database_manager.database_client)
     poll_task = asyncio.create_task(poller.run_forever())
     logger.info("Created task for polling")
     app.state.greenhouse_poll_task = poll_task

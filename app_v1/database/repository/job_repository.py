@@ -3,7 +3,7 @@ from typing import Sequence
 
 from app_v1.commons.service_logger import setup_logger
 from app_v1.database.database_client import PostgresSQLDatabaseClient
-from app_v1.database.database_models.job_model import Job, compute_hash
+from app_v1.database.database_models.job_model import Job, JobStatus, compute_hash
 from app_v1.database.tables import DatabaseTables
 from app_v1.models.request_models.job_creation_request import JobCreationRequest
 
@@ -31,7 +31,7 @@ class JobRepository:
         for r in rows:
             desc = r.job_description or ""
             h = compute_hash(desc)
-            args_list.append((r.company, r.job_link, r.job_id, r.job_description, h, now, "pending"))
+            args_list.append((r.company, r.job_link, r.job_id, r.job_description, h, now, JobStatus.PENDING.value))
 
         query = f"""
         INSERT INTO {table} (company, job_link, job_id, job_description, description_hash, created_at, status)
@@ -50,23 +50,23 @@ class JobRepository:
         query = f"""
         SELECT id, company, job_link, job_id, job_description, description_hash, created_at, status
         FROM {table}
-        WHERE status = 'pending'
+        WHERE status = $1
         ORDER BY created_at ASC, id ASC
-        LIMIT $1 OFFSET $2
+        LIMIT $2 OFFSET $3
         """
         try:
-            rows = await self._database_client.fetch(query, limit, offset)
+            rows = await self._database_client.fetch(query, JobStatus.PENDING.value, limit, offset)
         except Exception:
             logger.error("Database error in list_pending", exc_info=True)
             raise
         return [Job(**dict(r)) for r in rows]
 
     async def mark_sent_by_id(self, job_id: int) -> bool:
-        """Set status='sent' for a specific row id. Returns True if a row was updated."""
+        """Set status to done for a specific row id. Returns True if a row was updated."""
         table = DatabaseTables.JOB_TABLE.value
-        query = f"UPDATE {table} SET status = 'sent' WHERE id = $1"
+        query = f"UPDATE {table} SET status = $2 WHERE id = $1"
         try:
-            result = await self._database_client.execute(query, job_id)
+            result = await self._database_client.execute(query, job_id, JobStatus.DONE.value)
         except Exception:
             logger.error("Database error in mark_sent_by_id id=%s", job_id, exc_info=True)
             raise
@@ -82,11 +82,11 @@ class JobRepository:
         h = compute_hash(job_description or "")
         query = f"""
         UPDATE {table}
-        SET status = 'sent'
+        SET status = $4
         WHERE company = $1 AND job_link = $2 AND description_hash = $3
         """
         try:
-            result = await self._database_client.execute(query, company, job_link, h)
+            result = await self._database_client.execute(query, company, job_link, h, JobStatus.DONE.value)
         except Exception:
             logger.error(
                 "Database error in mark_sent_by_unique_key company=%s job_link=%s",

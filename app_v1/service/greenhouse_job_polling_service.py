@@ -2,7 +2,6 @@ import asyncio
 import json
 import time
 from html import unescape
-from pathlib import Path
 from typing import Any
 
 import requests
@@ -13,6 +12,7 @@ from app_v1.config.config_loader import (
     fetch_key_value,
     project_root,
 )
+from app_v1.database.database_client import BaseDatabaseClient
 from app_v1.database.repository.job_repository import JobRepository
 from app_v1.models.request_models.job_creation_request import JobCreationRequest
 
@@ -28,27 +28,20 @@ class GreenhouseJobPollingService:
 
     def __init__(
         self,
-        job_repository: JobRepository,
-        compressed_json_path: Path | str | None = None,
-        *,
-        whitelist_json_path: Path | str | None = None,
-        http_timeout: int | None = None,
-        poll_interval_seconds: float | None = None,
-        max_retries: int | None = None,
+        database_client: BaseDatabaseClient
     ):
         cfg = fetch_key_value(GREENHOUSE_POLLING_CONFIG_KEY, GreenhousePollingConfig)
         root = project_root()
-        self._job_repository = job_repository
+        self._database_client=database_client
+        self._job_repository = JobRepository(database_client)
         self._compressed_path = (
-            Path(compressed_json_path) if compressed_json_path else root / cfg.compressed_clients_relative_path
+            root / cfg.compressed_clients_relative_path
         )
-        self._whitelist_path = Path(whitelist_json_path) if whitelist_json_path else root / cfg.whitelist_relative_path
+        self._whitelist_path =  root / cfg.whitelist_relative_path
         self._jobs_api_url_template = cfg.jobs_api_url_template
-        self._http_timeout = http_timeout if http_timeout is not None else cfg.http_timeout_default
-        self._poll_interval_seconds = (
-            cfg.poll_interval_seconds_default
-        )
-        self._max_retries = max_retries if max_retries is not None else cfg.max_retries_default
+        self._http_timeout =  cfg.http_timeout_default
+        self._poll_interval_seconds = cfg.poll_interval_seconds_default
+        self._max_retries = cfg.max_retries_default
 
     def _load_whitelist_companies(self) -> set[str]:
         if not self._whitelist_path.is_file():
@@ -143,7 +136,6 @@ class GreenhouseJobPollingService:
             payload = await asyncio.to_thread(self._fetch_jobs_payload, token)
             if not payload:
                 continue
-            api_jobs = len(payload.get("jobs", []))
             rows = self._rows_for_board(token, payload)
             if not rows:
                 continue
