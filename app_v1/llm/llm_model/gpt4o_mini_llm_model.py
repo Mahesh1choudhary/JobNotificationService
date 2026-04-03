@@ -36,13 +36,19 @@ class GPT4OMiniLLMModel(LLMModel):
         
         ### Task
         Your task is analyze the given job description and extract specific fields:
+            - `job_role_name`: string -> Name of the job. Examples: SDE 1, SDE 2, Staff Engineer, Customer Success Manager, etc
             - `job_company_name` : string -> Name of the company offering the job
-            - `job_experience_level`: "Intern" | "FullTime" -> 
+            - `job_type`: "Intern" | "FullTime" -> 
                 - "Intern" if internship
                 - "FullTime" if full-time roles
+            - `job_experience_level`: years of experience of person. Decide based on minimum year of experience required for job
+                - Entry if minimum year of experience required is in [0,2)
+                - JUNIOR = if minimum year of experience required is in [2,4)
+                - MID = if minimum year of experience required is in [4,6)
+                - SENIOR = if minimum year of experience required is in [6,10)
+                - EXPERT = if minimum year of experience required is more than 10
             - `job_location`: string -> Location of the job. Should be city name, Country name or remote if applicable
             - `job_department`: string -> Department based on job work. Examples- Engineering, Sales, Finance, etc
-            - `job_role_name`: string -> Name of the job. Examples: SDE 1, SDE 2, Staff Engineer, Customer Success Manager, etc
             - `job_summary`: string -> 4-5 lines summary about the job
                 - It should include info about the tech stack if present in job description: programming langauges, frameworks, databases, etc
                 - It should contain year of experience if present in job description
@@ -56,11 +62,12 @@ class GPT4OMiniLLMModel(LLMModel):
         
         ### Output:
         {{
+            "job_role_name": `job_role_name`,
             "job_company_name": `job_company_name`,
+            "job_type": `job_type`,
             "job_experience_level": `job_experience_level`,
             "job_location": `job_location`,
             "job_department": `job_department`,
-            "job_role_name": `job_role_name`,
             "job_summary": `job_summary`
         }}
         """
