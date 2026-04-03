@@ -1,23 +1,17 @@
-import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 import uvicorn
-
-from app_v1.commons.service_logger import setup_logger
 
 from app_v1.database.database_config import DatabaseConfigFactory
 from app_v1.database.database_manager import DatabaseManager
 from app_v1.llm.llm_manager import LLMManager
 from app_v1.llm.llm_model.gpt4o_mini_llm_model import GPT4OMiniLLMModel
 from app_v1.controller.user_controller import user_router
-from app_v1.service.greenhouse_job_polling_service import GreenhouseJobPollingService
 
-logger = setup_logger()
 
 @asynccontextmanager
 async def lifespan(app:FastAPI):
-
     # setting llm manager and creating database instance
     llm_manager = LLMManager()
     llm_manager.set_tag_generation_model(GPT4OMiniLLMModel())
@@ -28,19 +22,7 @@ async def lifespan(app:FastAPI):
 
     app.state.database_manager = database_manager #will be used in dependency injections
 
-    poller = GreenhouseJobPollingService(database_manager.database_client)
-    poll_task = asyncio.create_task(poller.run_forever())
-    logger.info("Created task for polling")
-    app.state.greenhouse_poll_task = poll_task
-
     yield
-
-    if poll_task is not None:
-        poll_task.cancel()
-        try:
-            await poll_task
-        except asyncio.CancelledError:
-            pass
 
     await database_manager.close()
 
