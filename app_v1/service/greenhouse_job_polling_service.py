@@ -127,6 +127,7 @@ class GreenhouseJobPollingService:
         return rows
 
     async def poll_once(self) -> None:
+        logger.info("Starting polling cycle")
         tokens = await asyncio.to_thread(self._load_companies)
         if not tokens:
             logger.warning("No board tokens loaded; skip poll cycle")

@@ -9,7 +9,11 @@ class DatabaseWrapperConfig(BaseModel):
 
 
 class GreenhousePollingConfig(BaseModel):
-    """Static config for Greenhouse board polling; loaded from config_data.json via fetch_key_value."""
+    """Static config for Greenhouse board polling; loaded from config_data.json via fetch_key_value.
+
+    Fields omitted from the JSON object use these model defaults. Any key present in JSON overrides
+    the corresponding default (including poll_interval_seconds_default).
+    """
 
     jobs_api_url_template: str
     compressed_clients_relative_path: str
