@@ -1,22 +1,22 @@
 import asyncio
 import json
-import os
 import time
 from html import unescape
 from pathlib import Path
 from typing import Any
 
 import requests
-
+from app_v1.config.config_keys import GREENHOUSE_POLLING_CONFIG_KEY
+from app_v1.config.config_classes_and_constants import GreenhousePollingConfig
 from app_v1.commons.service_logger import setup_logger
+from app_v1.config.config_loader import (
+    fetch_key_value,
+    project_root,
+)
 from app_v1.database.repository.job_repository import JobRepository
 from app_v1.models.request_models.job_creation_request import JobCreationRequest
 
 logger = setup_logger()
-
-GH_JOBS_URL = "https://boards-api.greenhouse.io/v1/boards/{companyName}/jobs?content=true"
-DEFAULT_COMPRESSED_PATH = Path(__file__).resolve().parent.parent / "config" / "greenhouse_clients_compressed.json"
-DEFAULT_WHITELIST_PATH = Path(__file__).resolve().parent.parent / "config" / "whitelist_companies.json"
 
 
 class GreenhouseJobPollingService:
@@ -32,18 +32,25 @@ class GreenhouseJobPollingService:
         compressed_json_path: Path | str | None = None,
         *,
         whitelist_json_path: Path | str | None = None,
-        http_timeout: int = 10,
-        poll_interval_seconds: float = 30.0,
-        max_retries: int = 3,
+        http_timeout: int | None = None,
+        poll_interval_seconds: float | None = None,
+        max_retries: int | None = None,
     ):
+        cfg = fetch_key_value(GREENHOUSE_POLLING_CONFIG_KEY, GreenhousePollingConfig)
+        root = project_root()
         self._job_repository = job_repository
-        self._compressed_path = Path(compressed_json_path or DEFAULT_COMPRESSED_PATH)
-        self._whitelist_path = Path(whitelist_json_path or DEFAULT_WHITELIST_PATH)
-        self._http_timeout = http_timeout
-        self._poll_interval_seconds = poll_interval_seconds
-        self._max_retries = max_retries
+        self._compressed_path = (
+            Path(compressed_json_path) if compressed_json_path else root / cfg.compressed_clients_relative_path
+        )
+        self._whitelist_path = Path(whitelist_json_path) if whitelist_json_path else root / cfg.whitelist_relative_path
+        self._jobs_api_url_template = cfg.jobs_api_url_template
+        self._http_timeout = http_timeout if http_timeout is not None else cfg.http_timeout_default
+        self._poll_interval_seconds = (
+            cfg.poll_interval_seconds_default
+        )
+        self._max_retries = max_retries if max_retries is not None else cfg.max_retries_default
 
-    def _load_whitelist_tokens(self) -> set[str]:
+    def _load_whitelist_companies(self) -> set[str]:
         if not self._whitelist_path.is_file():
             logger.error("Whitelist JSON not found: %s", self._whitelist_path)
             return set()
@@ -55,7 +62,7 @@ class GreenhouseJobPollingService:
             return set()
         return {str(name).strip().lower() for name in raw if str(name).strip()}
 
-    def _load_board_tokens(self) -> list[str]:
+    def _load_companies(self) -> list[str]:
         if not self._compressed_path.is_file():
             logger.error("Greenhouse compressed JSON not found: %s", self._compressed_path)
             return []
@@ -75,7 +82,7 @@ class GreenhouseJobPollingService:
             t = item.strip().lower()
             if t:
                 tokens.add(t)
-        whitelist = self._load_whitelist_tokens()
+        whitelist = self._load_whitelist_companies()
         if not whitelist:
             logger.warning("Whitelist is empty or invalid; skipping poll cycle")
             return []
@@ -83,7 +90,7 @@ class GreenhouseJobPollingService:
         return sorted(tokens)
 
     def _fetch_jobs_payload(self, board_token: str) -> dict[str, Any] | None:
-        url = GH_JOBS_URL.format(companyName=board_token)
+        url = self._jobs_api_url_template.format(companyName=board_token)
         for attempt in range(self._max_retries):
             try:
                 resp = requests.get(url, timeout=self._http_timeout)
@@ -127,7 +134,7 @@ class GreenhouseJobPollingService:
         return rows
 
     async def poll_once(self) -> None:
-        tokens = await asyncio.to_thread(self._load_board_tokens)
+        tokens = await asyncio.to_thread(self._load_companies)
         if not tokens:
             logger.warning("No board tokens loaded; skip poll cycle")
             return
@@ -153,23 +160,20 @@ class GreenhouseJobPollingService:
         )
 
     async def run_forever(self) -> None:
+        logger.info(
+            "Greenhouse poll loop started (interval=%ss between cycles)",
+            self._poll_interval_seconds,
+        )
         while True:
             try:
                 await self.poll_once()
+            except asyncio.CancelledError:
+                logger.info("Greenhouse poll loop cancelled")
+                raise
             except Exception:
                 logger.exception("Greenhouse poll cycle failed")
-            await asyncio.sleep(self._poll_interval_seconds)
-
-
-def polling_enabled_from_env() -> bool:
-    return os.getenv("GREENHOUSE_POLLING_ENABLED", "").strip().lower() in ("1", "true", "yes", "on")
-
-
-def poll_interval_from_env(default: float = 360.0) -> float:
-    raw = os.getenv("GREENHOUSE_POLL_INTERVAL_SECONDS")
-    if not raw:
-        return default
-    try:
-        return max(30.0, float(raw))
-    except ValueError:
-        return default
+            try:
+                await asyncio.sleep(self._poll_interval_seconds)
+            except asyncio.CancelledError:
+                logger.info("Greenhouse poll loop cancelled during sleep")
+                raise

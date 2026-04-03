@@ -4,11 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 import uvicorn
 
-from pathlib import Path
-
 from app_v1.commons.service_logger import setup_logger
-# call startup helper to ensure compressed resources exist
-# from startup import ensure_compressed  # type: ignore
 
 from app_v1.database.database_config import DatabaseConfigFactory
 from app_v1.database.database_manager import DatabaseManager
@@ -16,10 +12,7 @@ from app_v1.llm.llm_manager import LLMManager
 from app_v1.llm.llm_model.gpt4o_mini_llm_model import GPT4OMiniLLMModel
 from app_v1.controller.user_controller import user_router
 from app_v1.database.repository.job_repository import JobRepository
-from app_v1.service.greenhouse_job_polling_service import (
-    GreenhouseJobPollingService,
-    poll_interval_from_env,
-)
+from app_v1.service.greenhouse_job_polling_service import GreenhouseJobPollingService
 
 logger = setup_logger()
 
@@ -37,15 +30,8 @@ async def lifespan(app:FastAPI):
     app.state.database_manager = database_manager #will be used in dependency injections
 
     poll_task: asyncio.Task | None = None
-    resources_dir = Path(__file__).resolve().parent / "config"
-    compressed_path = resources_dir / "greenhouse_clients_compressed.json"
-    logger.info(compressed_path)
     job_repo = JobRepository(database_manager.database_client)
-    poller = GreenhouseJobPollingService(
-        job_repo,
-        compressed_json_path=compressed_path,
-        poll_interval_seconds=poll_interval_from_env(),
-    )
+    poller = GreenhouseJobPollingService(job_repo)
     poll_task = asyncio.create_task(poller.run_forever())
     logger.info("Created task for polling")
     app.state.greenhouse_poll_task = poll_task
