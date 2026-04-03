@@ -1,10 +1,11 @@
-from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Sequence
 
 from app_v1.commons.service_logger import setup_logger
 from app_v1.database.database_client import PostgresSQLDatabaseClient
-from app_v1.database.database_models.job_model import compute_hash
+from app_v1.database.database_models.job_model import Job, compute_hash
+from app_v1.database.tables import DatabaseTables
+from app_v1.models.request_models.job_creation_request import JobCreationRequest
 
 logger = setup_logger()
 
@@ -14,45 +15,26 @@ def _utc_now_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
-@dataclass(frozen=True)
-class JobInsertRow:
-    company: str
-    job_link: str
-    job_id: str | None
-    job_description: str | None
-
-
-@dataclass(frozen=True)
-class JobRow:
-    id: int
-    company: str
-    job_link: str
-    job_id: str | None
-    job_description: str | None
-    description_hash: str
-    created_at: datetime | None
-    status: str
-
-
 class JobRepository:
-    """Persists Greenhouse (and other) job rows into the `jobs` table (see JobModel)."""
+    """Persists Greenhouse (and other) job rows into the `jobs` table (see Job)."""
 
     def __init__(self, database_client: PostgresSQLDatabaseClient):
         self._database_client = database_client
 
-    async def insert_jobs_ignore_duplicates(self, rows: Sequence[JobInsertRow]) -> int:
+    async def insert_jobs_ignore_duplicates(self, rows: Sequence[JobCreationRequest]) -> int:
         """Insert rows; duplicates (same company, job_link, description_hash) are skipped. Returns rows submitted."""
         if not rows:
             return 0
         now = _utc_now_naive()
+        table = DatabaseTables.JOB_TABLE.value
         args_list = []
         for r in rows:
             desc = r.job_description or ""
             h = compute_hash(desc)
             args_list.append((r.company, r.job_link, r.job_id, r.job_description, h, now, "pending"))
 
-        query = """
-        INSERT INTO jobs (company, job_link, job_id, job_description, description_hash, created_at, status)
+        query = f"""
+        INSERT INTO {table} (company, job_link, job_id, job_description, description_hash, created_at, status)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         ON CONFLICT (company, job_link, description_hash) DO NOTHING
         """
@@ -63,10 +45,11 @@ class JobRepository:
             raise
         return len(args_list)
 
-    async def list_pending(self, *, limit: int = 1000, offset: int = 0) -> list[JobRow]:
-        query = """
+    async def list_pending(self, *, limit: int = 1000, offset: int = 0) -> list[Job]:
+        table = DatabaseTables.JOB_TABLE.value
+        query = f"""
         SELECT id, company, job_link, job_id, job_description, description_hash, created_at, status
-        FROM jobs
+        FROM {table}
         WHERE status = 'pending'
         ORDER BY created_at ASC, id ASC
         LIMIT $1 OFFSET $2
@@ -76,11 +59,12 @@ class JobRepository:
         except Exception:
             logger.error("Database error in list_pending", exc_info=True)
             raise
-        return [JobRow(**dict(r)) for r in rows]
+        return [Job(**dict(r)) for r in rows]
 
     async def mark_sent_by_id(self, job_id: int) -> bool:
         """Set status='sent' for a specific row id. Returns True if a row was updated."""
-        query = "UPDATE jobs SET status = 'sent' WHERE id = $1"
+        table = DatabaseTables.JOB_TABLE.value
+        query = f"UPDATE {table} SET status = 'sent' WHERE id = $1"
         try:
             result = await self._database_client.execute(query, job_id)
         except Exception:
@@ -94,9 +78,10 @@ class JobRepository:
         Convenience helper when you don't have the numeric id:
         updates the row identified by (company, job_link, description_hash).
         """
+        table = DatabaseTables.JOB_TABLE.value
         h = compute_hash(job_description or "")
-        query = """
-        UPDATE jobs
+        query = f"""
+        UPDATE {table}
         SET status = 'sent'
         WHERE company = $1 AND job_link = $2 AND description_hash = $3
         """
