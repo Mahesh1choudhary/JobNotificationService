@@ -6,8 +6,11 @@ import uvicorn
 from app_v1.database.database_config import DatabaseConfigFactory
 from app_v1.database.database_manager import DatabaseManager
 from app_v1.llm.llm_manager import LLMManager
+from app_v1.llm.llm_model.embedding_model import EmbeddingModel
 from app_v1.llm.llm_model.gpt4o_mini_llm_model import GPT4OMiniLLMModel
 from app_v1.controller.user_controller import user_router
+from app_v1.controller.user_preference_controller import user_preference_router
+from app_v1.controller.ingestion_controller import ingestion_router
 
 
 @asynccontextmanager
@@ -15,6 +18,7 @@ async def lifespan(app:FastAPI):
     # setting llm manager and creating database instance
     llm_manager = LLMManager()
     llm_manager.set_tag_generation_model(GPT4OMiniLLMModel())
+    llm_manager.set_embedding_model(EmbeddingModel())
 
     database_config = DatabaseConfigFactory.create_database_config()
     database_manager = DatabaseManager(database_config)
@@ -31,6 +35,8 @@ async def lifespan(app:FastAPI):
 def create_app() -> FastAPI:
     app = FastAPI(lifespan=lifespan)
     app.include_router(user_router)
+    app.include_router(user_preference_router)
+    app.include_router(ingestion_router)
     return app
 
 def print_routes(app: FastAPI) -> None:

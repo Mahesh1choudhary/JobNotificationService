@@ -49,3 +49,30 @@ CREATE TABLE IF NOT EXISTS user_quota (
     CHECK (used_count <= total_count)
 )
 --- by default index on user_id
+
+
+-- enabling vector extension
+CREATE EXTENSION IF NOT EXISTS vector;
+
+
+--- Job company names vector table
+CREATE TABLE IF NOT EXISTS job_company_names (
+    id SERIAL PRIMARY KEY,
+    company_name TEXT NOT NULL UNIQUE,
+    description TEXT,
+    embedding vector(1536)
+)
+CREATE INDEX ON job_company_names
+USING hnsw(embedding vector_cosine_ops);
+--- TODO: need to check other embeddings -> also currently using cosine rule, so when updated, update everwhere
+
+
+--- Job locations vector table
+CREATE TABLE IF NOT EXISTS job_locations (
+    id SERIAL PRIMARY KEY,
+    job_location TEXT NOT NULL UNIQUE,
+    description TEXT,
+    embedding vector(1536)
+)
+CREATE INDEX ON job_locations
+USING hnsw (embedding vector_cosine_ops)
