@@ -1,6 +1,7 @@
 import threading
 
 from app_v1.llm.llm_model.base_llm_model import LLMModel
+from app_v1.llm.llm_model.embedding_model import EmbeddingModel
 
 
 class LLMManager():
@@ -24,5 +25,13 @@ class LLMManager():
         if self.tag_generation_model is None:
             raise AttributeError("tag generation model is not set")
         return self.tag_generation_model
+
+    def set_embedding_model(self, model: EmbeddingModel):
+        self.embedding_model:EmbeddingModel = model
+
+    def get_embedding_model(self) -> EmbeddingModel:
+        if self.embedding_model is None:
+            raise AttributeError("embedding model is not set")
+        return self.embedding_model
 
 

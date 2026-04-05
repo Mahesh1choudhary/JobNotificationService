@@ -7,12 +7,12 @@ from app_v1.controller.dependency.dependency_functions import get_user_preferenc
 from app_v1.models.request_models.user_preference_request import UserPreferenceRequest
 from app_v1.service.user_preferences_service import UserPreferencesService
 
-router = APIRouter(prefix="/user_preferences")
+user_preference_router = APIRouter(prefix="/user_preferences")
 logger = setup_logger()
 
-router.post("/add_preferences")
+user_preference_router.post("/add_preferences")
 async def add_user_preferences(user_preferences: Annotated[UserPreferenceRequest, Body()],
-                               user_preferences_service: UserPreferencesService = Depends(get_user_preferences_service())):
+                               user_preferences_service: UserPreferencesService = Depends(get_user_preferences_service)):
 
     try:
         result = await user_preferences_service.add_user_preferences(user_preferences)
@@ -23,9 +23,9 @@ async def add_user_preferences(user_preferences: Annotated[UserPreferenceRequest
         raise HTTPException(status_code=500, detail=f"Internal Server Error")
 
 
-router.post("/remove_preferences")
+user_preference_router.post("/remove_preferences")
 async def remove_user_preferences(user_preferences: Annotated[UserPreferenceRequest, Body()],
-                                  user_preferences_service: UserPreferencesService = Depends(get_user_preferences_service())):
+                                  user_preferences_service: UserPreferencesService = Depends(get_user_preferences_service)):
     try:
         result = await user_preferences_service.remove_user_preferences(user_preferences)
         return result
