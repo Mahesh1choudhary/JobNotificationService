@@ -24,7 +24,7 @@ class JobLocationNamespace(BaseNamespace[JobLocationVector]):
         #TODO: reconsider what to embed
         text_to_embed = f"{data.job_location}, {data.description}"
         embedding_model:EmbeddingModel = llm_manager.get_embedding_model()
-        embeddings = embedding_model.get_embeddings(text_to_embed)
+        embeddings = await embedding_model.get_embeddings(text_to_embed)
 
         data_to_insert = data.model_dump()
         #TODO: column name "embedding" is hard coded at most places, recheck

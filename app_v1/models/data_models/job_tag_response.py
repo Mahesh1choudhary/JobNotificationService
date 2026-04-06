@@ -1,16 +1,5 @@
 from enum import Enum
-
 from pydantic import BaseModel
-
-
-class JobTagResponse(BaseModel):
-    job_role_name: str # SDE1, Staff Engineer, customer success manager, etc
-    job_company_name: str # company to which this job belongs
-    job_type:JobType # Whether Intern or full time
-    job_experience_level: ExperienceLevel # in number of years
-    job_location: str # job location -> Bangalore, New York , remote, etc
-    job_department: str # Engineering, sales, finance, etc
-    job_summary: str # 4-5 lines about the job -> tech stack , year of experience etc.
 
 
 class JobType(str, Enum):
@@ -39,3 +28,14 @@ class ExperienceLevel(str, Enum):
     MID = "[4-6)"
     SENIOR = "[6-10)"
     EXPERT = "10+"
+
+
+
+class JobTagResponse(BaseModel):
+    job_role_name: str # SDE1, Staff Engineer, customer success manager, etc
+    job_company_name: str # company to which this job belongs
+    job_type:JobType # Whether Intern or full time
+    job_experience_level: ExperienceLevel # in number of years
+    job_location: str # job location -> Bangalore, New York , remote, etc
+    job_department: str # Engineering, sales, finance, etc
+    job_summary: str # 4-5 lines about the job -> tech stack , year of experience etc.
