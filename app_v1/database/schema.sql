@@ -30,14 +30,22 @@ CREATE TABLE IF NOT EXISTS users (
 ---3 job notification target table
 CREATE TABLE IF NOT EXISTS job_notification_targets (
     id SERIAL PRIMARY KEY,
-    job_role_name TEXT NOT NULL,
+    job_experience_level TEXT NOT NULL,
     job_location TEXT NOT NULL,
     company_name TEXT NOT NULL,
     user_ids INT[] NOT NULL DEFAULT '{}',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(job_role_name, job_location, company_name)
 
-)
+    -- This constraint ensures only your Enum values can be inserted
+    CONSTRAINT valid_experience_level CHECK (
+    job_experience_level IN ('[0,2)', '[2-4)', '[4-6)', '[6-10)', '10+')
+    ),
+
+    -- Ensures we don't have duplicate targeting rules
+    UNIQUE(job_experience_level, job_location, company_name)
+);
+
+
 
 
 

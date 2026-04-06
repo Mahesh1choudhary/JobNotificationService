@@ -3,9 +3,7 @@ from pydantic import BaseModel
 from app_v1.models.data_models.job_tag_response import ExperienceLevel
 
 
-#TODO: need to update- add department, type ,etc
-class UserInterest(BaseModel):
+class JobMatchCriteria(BaseModel):
     job_experience_level: ExperienceLevel
-    job_locations: list[str]
-    company_names:list[str]
-
+    job_location: str
+    job_company_name: str
