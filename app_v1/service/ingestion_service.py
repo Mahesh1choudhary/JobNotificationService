@@ -21,6 +21,7 @@ class IngestionService():
             raise ValueError(f"Namespace {ingestion_request.namespace_type} not supported; available ones : {",".join(self._namespace_mapping.keys())}")
 
         #TODO: need to add batch ingesting in the namespace
+        #TODO: need to convert into lower cases
         ingestion_data = ingestion_request.data
         for single_ingestion in ingestion_data:
             await namespace_instance.ingest_data(single_ingestion)
