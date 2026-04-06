@@ -1,0 +1,92 @@
+{
+  "namespace_type": "job_company_namespace",
+  "data":[
+    {
+      "company_name": "rubrik",
+      "description": ""
+    },
+    {
+      "company_name": "databricks",
+      "description": ""
+    },
+    {
+      "company_name": "tower research capital",
+      "description": ""
+    },
+    {
+      "company_name": "rubrik",
+      "description": ""
+    },
+    {
+      "company_name": "atlassian",
+      "description": ""
+    },
+    {
+      "company_name": "uber",
+      "description": ""
+    },
+    {
+      "company_name": "google",
+      "description": ""
+    },
+    {
+      "company_name": "d.e. shaw",
+      "description": "d.e. shaw group, d.e. shaw india"
+    },
+    {
+      "company_name": "razorpay",
+      "description": ""
+    },
+    {
+      "company_name": "browserstack",
+      "description": ""
+    },
+    {
+      "company_name": "confluent",
+      "description": ""
+    },
+    {
+      "company_name": "graviton research capital",
+      "description": ""
+    },
+    {
+      "company_name": "hudson river trading",
+      "description": "hrt"
+    },
+    {
+      "company_name": "jane street",
+      "description": ""
+    },
+    {
+      "company_name": "microsoft",
+      "description": ""
+    },
+    {
+      "company_name": "meta",
+      "description": ""
+    },
+    {
+      "company_name": "amazon",
+      "description": ""
+    },
+    {
+      "company_name": "salesforce",
+      "description": ""
+    },
+    {
+      "company_name": "intuit",
+      "description": ""
+    },
+    {
+      "company_name": "nvidia",
+      "description": ""
+    },
+    {
+      "company_name": "adobe",
+      "description": ""
+    },
+    {
+
+    }
+  ]
+}

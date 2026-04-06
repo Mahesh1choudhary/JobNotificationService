@@ -32,6 +32,7 @@ class BaseVectorRepository():
         query = f"""
             INSERT INTO {self._table_name} ({columns})
             VALUES ({placeholders})
+            ON CONFLICT DO NOTHING
         """
 
         try:

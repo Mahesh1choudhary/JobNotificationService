@@ -90,4 +90,3 @@ class JobNotificationService:
                                                job_company_name=job_tag_response.job_company_name)
         await self._job_notification_target_repository.add_new_interest_row(job_match_criteria)
 
-

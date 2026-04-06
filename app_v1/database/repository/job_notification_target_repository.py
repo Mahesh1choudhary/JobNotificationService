@@ -65,11 +65,11 @@ class JobNotificationTargetRepository:
     async def get_job_notification_target_by_job_tags(self, job_tag_response: JobTagResponse) -> JobNotificationTarget | None:
         query = f"""
             SELECT * FROM {DatabaseTables.JOB_NOTIFICATION_TARGETS_TABLE.value}
-            WHERE job_role_name = $1 AND job_location = $2 AND company_name = $3
+            WHERE job_experience_level = $1 AND job_location = $2 AND company_name = $3
         """
 
         try:
-            row = await self._database_client.fetchrow(query, job_tag_response.job_role_name, job_tag_response.job_location, job_tag_response.job_company_name)
+            row = await self._database_client.fetchrow(query, job_tag_response.job_experience_level, job_tag_response.job_location, job_tag_response.job_company_name)
             if row is None:
                 return None
             return JobNotificationTarget(**dict(row))

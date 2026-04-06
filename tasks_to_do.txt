@@ -17,3 +17,5 @@
 7 - adding interests in database
 
 8- data ingestion
+
+9 - need to add retries on externa api calls
