@@ -24,6 +24,7 @@ class TelegramNotificationRenderer(NotificationRenderer):
                 f"<b>Job Experience Level :</b> {payload.job_experience_level.value}\n"
                 f"<b>Job Location :</b> {payload.job_location}\n"
                 f"<b>Job Department :</b> {payload.job_department}\n"
+                f"<b>Job Link :</b> {payload.job_link}\n"
                 f"<b>Job Summary :</b> {html.escape(payload.job_summary)}"
             )
         else:

@@ -51,7 +51,7 @@ class JobNotificationService:
     async def generate_tags_and_send_notifications(self, job_content: str):
         try:
             job_tag_response:JobTagResponse = await self.generate_tags(job_content)
-            #TODO: how to generate job link -> from llm only or can get from job_content?
+            #TODO: job_link is optional in the job tag response, if during scraping we can find, then we will just update
 
             job_tag_response = await self.update_by_closest_matches(job_tag_response)
             notification_payload = JobNotificationPayload(**job_tag_response.model_dump())
@@ -76,5 +76,4 @@ class JobNotificationService:
         job_tag_response.job_location = best_match_job_locations[0].job_location.lower()
 
         return job_tag_response
-
 
