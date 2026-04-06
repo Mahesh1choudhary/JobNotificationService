@@ -13,3 +13,7 @@
 5 -> listening on telegram api to get user telegram chat ids and push then to db
 
 6 -> doing proper logging
+
+7 - adding interests in database
+
+8- data ingestion

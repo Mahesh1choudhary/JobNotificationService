@@ -38,4 +38,5 @@ class JobTagResponse(BaseModel):
     job_experience_level: ExperienceLevel # in number of years
     job_location: str # job location -> Bangalore, New York , remote, etc
     job_department: str # Engineering, sales, finance, etc
+    job_link: str | None = None # Link to the job - LLM will generate if possible, otherwise will fill ourselves.
     job_summary: str # 4-5 lines about the job -> tech stack , year of experience etc.

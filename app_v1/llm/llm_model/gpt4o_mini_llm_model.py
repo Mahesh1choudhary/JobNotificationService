@@ -33,6 +33,9 @@ class GPT4OMiniLLMModel(LLMModel):
         return """
         ### Role
         You are expert at extracting structured job information from the job description.
+             
+        ### Input:
+        - `job_description`: {job_description}
         
         ### Task
         Your task is analyze the given job description and extract specific fields:
@@ -49,12 +52,10 @@ class GPT4OMiniLLMModel(LLMModel):
                 - EXPERT = if minimum year of experience required is more than 10
             - `job_location`: string -> Location of the job. Should be city name, Country name or remote if applicable
             - `job_department`: string -> Department based on job work. Examples- Engineering, Sales, Finance, etc
+            - `job_link`: string | None -> link to the job
             - `job_summary`: string -> 4-5 lines summary about the job
                 - It should include info about the tech stack if present in job description: programming langauges, frameworks, databases, etc
                 - It should contain year of experience if present in job description
-            
-        ### Input:
-        - `job_description`: {job_description}
         
         ### Rules:
         - Return ***valid JSON***. All keys must be present in output
@@ -68,6 +69,7 @@ class GPT4OMiniLLMModel(LLMModel):
             "job_experience_level": `job_experience_level`,
             "job_location": `job_location`,
             "job_department": `job_department`,
+            "job_link": `job_link`,
             "job_summary": `job_summary`
         }}
         """
