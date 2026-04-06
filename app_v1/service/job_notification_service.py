@@ -6,9 +6,11 @@ from app_v1.commons.service_logger import setup_logger
 from app_v1.database.database_client import BaseDatabaseClient
 from app_v1.database.database_config import DatabaseConfigFactory
 from app_v1.database.database_manager import DatabaseManager
+from app_v1.database.repository.job_notification_target_repository import JobNotificationTargetRepository
 from app_v1.llm.llm_manager import LLMManager
 from app_v1.llm.llm_model.embedding_model import EmbeddingModel
 from app_v1.llm.llm_model.gpt4o_mini_llm_model import GPT4OMiniLLMModel
+from app_v1.models.data_models.job_match_criteria import JobMatchCriteria
 from app_v1.models.data_models.job_tag_response import JobTagResponse
 from app_v1.service.notification_service.notification_service import NotificationService
 from app_v1.service.notification_service.notification_service_helpers.event_bus import EventBus
@@ -29,6 +31,7 @@ class JobNotificationService:
         self._agent = TagGenerationAgent()
         self._job_company_name_namespace = JobCompanyNameNamespace(database_client)
         self._job_location_namespace = JobLocationNamespace(database_client)
+        self._job_notification_target_repository = JobNotificationTargetRepository(database_client)
 
         #TODO: in future all  handler, event bus setup,etc should be at a common separate place- maybe in fastapi lifespan
         #setting up handlers and event bus for job event
@@ -54,6 +57,10 @@ class JobNotificationService:
             #TODO: job_link is optional in the job tag response, if during scraping we can find, then we will just update
 
             job_tag_response = await self.update_by_closest_matches(job_tag_response)
+
+            # adding combination row in interest/job_notification_target table- will be ignored if already present
+            await self.add_new_interest_row(job_tag_response)
+
             notification_payload = JobNotificationPayload(**job_tag_response.model_dump())
 
             job_event = JobEvent(event_type=EventType.JOB_EVENT, job_tag_response=job_tag_response, job_notification_payload= notification_payload)
@@ -76,4 +83,11 @@ class JobNotificationService:
         job_tag_response.job_location = best_match_job_locations[0].job_location.lower()
 
         return job_tag_response
+
+
+    async def add_new_interest_row(self, job_tag_response:JobTagResponse):
+        job_match_criteria =  JobMatchCriteria(job_experience_level=job_tag_response.job_experience_level, job_location=job_tag_response.job_location,
+                                               job_company_name=job_tag_response.job_company_name)
+        await self._job_notification_target_repository.add_new_interest_row(job_match_criteria)
+
 

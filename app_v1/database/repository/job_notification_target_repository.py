@@ -3,7 +3,9 @@ from app_v1.database.database_client import BaseDatabaseClient
 
 from app_v1.database.database_models.job_notification_targets import JobNotificationTarget
 from app_v1.database.tables import DatabaseTables
+from app_v1.models.data_models.job_match_criteria import JobMatchCriteria
 from app_v1.models.data_models.job_tag_response import JobTagResponse
+from app_v1.models.data_models.user_interest import UserInterest
 from app_v1.models.request_models.user_preference_request import UserPreferenceRequest
 
 logger = setup_logger()
@@ -15,6 +17,7 @@ class JobNotificationTargetRepository:
 
 
     async def add_user_preferences(self, user_id:int, input_user_preference: UserPreferenceRequest) -> None:
+        #TODO: update here
         query = f"""
             update {DatabaseTables.JOB_NOTIFICATION_TARGETS_TABLE.value} set
         """
@@ -27,6 +30,7 @@ class JobNotificationTargetRepository:
             raise
 
     async def remove_user_preferences(self, user_id:int, input_user_preferences: UserPreferenceRequest) -> None:
+        #TODO: update here
         query = f"""
             update {DatabaseTables.JOB_NOTIFICATION_TARGETS_TABLE.value} set
         """
@@ -38,6 +42,25 @@ class JobNotificationTargetRepository:
             logger.error("Database error in add_user_preference", exc_info=True)
             raise
 
+
+    async def add_new_interest_row(self, job_match_criteria:JobMatchCriteria) -> None:
+        query = f"""
+            INSERT INTO {DatabaseTables.JOB_NOTIFICATION_TARGETS_TABLE.value} 
+            (job_experience_level, job_location, company_name, user_ids)
+            VALUES ($1, $2, $3, '{{}}'::INT[])
+            ON CONFLICT (job_experience_level, job_location, company_name)
+            DO NOTHING;
+        """
+        values = [
+            job_match_criteria.job_experience_level.value,
+            job_match_criteria.job_location,
+            job_match_criteria.job_company_name
+        ]
+        try:
+            await self._database_client.execute(query, *values)
+        except Exception as exc:
+            logger.error("Database error in add_new_interest_row", exc_info=True)
+            raise
 
     async def get_job_notification_target_by_job_tags(self, job_tag_response: JobTagResponse) -> JobNotificationTarget | None:
         query = f"""
