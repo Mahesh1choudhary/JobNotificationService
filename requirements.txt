@@ -1,0 +1,9 @@
+fastapi==0.135.1
+uvicorn[standard]==0.40.0
+pydantic==2.12.5
+pydantic-settings==2.13.1
+langchain==1.2.13
+autogen-agentchat==0.5.7
+tenacity==9.0.0
+requests==2.31.0
+sqlalchemy==2.0.48

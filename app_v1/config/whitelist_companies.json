@@ -1,0 +1,27 @@
+{
+    "companies": [
+        "twilio",
+        "stripe",
+        "zoom",
+        "salesforce",
+        "workday",
+        "uber",
+        "lyft",
+        "postmates",
+        "grubhub",
+        "deliveroo",
+        "justeat",
+        "ubereats",
+        "doordash",
+        "rubrik",
+        "akamai",
+        "databricks",
+        "capco",
+        "dexian",
+        "ambiq",
+        "lucidmotors",
+        "outlier.ai",
+        "confluent",
+        "thoughtworks"
+    ]
+}
