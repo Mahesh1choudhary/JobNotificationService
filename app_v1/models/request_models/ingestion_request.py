@@ -17,3 +17,9 @@ class NamespaceType(str, Enum):
 class IngestionRequest(BaseModel):
     namespace_type: NamespaceType
     data: List[Union[JobCompanyNameVector, JobLocationVector]]
+
+
+class CompanyJobSourceIngestionRequest(BaseModel):
+    company_name: str
+    platform_name: str
+    fetch_job_list_url: str

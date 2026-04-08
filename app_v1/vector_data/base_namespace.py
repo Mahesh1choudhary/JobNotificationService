@@ -10,7 +10,7 @@ class BaseNamespace(ABC, Generic[T]):
         pass
 
     @abstractmethod
-    async def ingest_data(self, data: T) -> None:
+    async def ingest_embedding_data(self, data: T) -> None:
         pass
 
     @abstractmethod

@@ -24,7 +24,7 @@ class JobCompanyNameNamespace(BaseNamespace[JobCompanyNameVector]):
         return "job_company_namespace"
 
     #TODO: need to add batch ingesting
-    async def ingest_data(self, data: JobCompanyNameVector):
+    async def ingest_embedding_data(self, data: JobCompanyNameVector):
         #TODO: reconsider what to embed
         text_to_embed = f"{data.company_name}, {data.description}"
         embedding_model:EmbeddingModel = llm_manager.get_embedding_model()

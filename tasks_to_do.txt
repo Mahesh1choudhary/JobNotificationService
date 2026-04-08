@@ -18,4 +18,6 @@
 
 8- data ingestion
 
-9 - need to add retries on externa api calls
+9 - need to add retries on external api calls
+
+10 - need to add concurrency controller at several places

@@ -1,27 +1,19 @@
 import hashlib
 from datetime import datetime
-from enum import StrEnum
+from enum import StrEnum, Enum
 
 from pydantic import BaseModel
 
 
-class JobStatus(StrEnum):
-    """Persisted in the database as plain strings (e.g. VARCHAR/TEXT)."""
-
+class JobProcessingStatus(str, Enum):
     PENDING = "pending"
-    DONE = "done"
-
-
-def compute_hash(description: str) -> str:
-    return hashlib.sha256(description.encode("utf-8")).hexdigest()
-
+    PROCESSED = "processed"
 
 class Job(BaseModel):
     id: int
-    company: str
+    job_company_name: str
     job_link: str
-    job_id: str | None
     job_description: str | None
-    description_hash: str
+    job_description_hash: str
     created_at: datetime | None
-    status: JobStatus
+    job_processing_status: JobProcessingStatus

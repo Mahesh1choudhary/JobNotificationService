@@ -1,9 +1,10 @@
 from datetime import datetime, timezone
 from typing import Sequence
 
+from app_v1.commons.hash_function import compute_hash
 from app_v1.commons.service_logger import setup_logger
-from app_v1.database.database_client import PostgresSQLDatabaseClient
-from app_v1.database.database_models.job_model import Job, JobStatus, compute_hash
+from app_v1.database.database_client import PostgresSQLDatabaseClient, BaseDatabaseClient
+from app_v1.database.database_models.job_model import Job, JobStatus
 from app_v1.database.tables import DatabaseTables
 from app_v1.models.request_models.job_creation_request import JobCreationRequest
 
@@ -11,14 +12,12 @@ logger = setup_logger()
 
 
 def _utc_now_naive() -> datetime:
-    """UTC wall time without tzinfo; asyncpg expects this for TIMESTAMP WITHOUT TIME ZONE."""
+    #TODO: need to check here
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class JobRepository:
-    """Persists Greenhouse (and other) job rows into the `jobs` table (see Job)."""
-
-    def __init__(self, database_client: PostgresSQLDatabaseClient):
+    def __init__(self, database_client: BaseDatabaseClient):
         self._database_client = database_client
 
     async def insert_jobs_ignore_duplicates(self, rows: Sequence[JobCreationRequest]) -> int:
@@ -26,7 +25,6 @@ class JobRepository:
         if not rows:
             return 0
         now = _utc_now_naive()
-        table = DatabaseTables.JOB_TABLE.value
         args_list = []
         for r in rows:
             desc = r.job_description or ""
@@ -34,9 +32,9 @@ class JobRepository:
             args_list.append((r.company, r.job_link, r.job_id, r.job_description, h, now, JobStatus.PENDING.value))
 
         query = f"""
-        INSERT INTO {table} (company, job_link, job_id, job_description, description_hash, created_at, status)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
-        ON CONFLICT (company, job_link, description_hash) DO NOTHING
+            INSERT INTO {DatabaseTables.JOB_TABLE.value} (company, job_link, job_id, job_description, description_hash, created_at, status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            ON CONFLICT (company, job_link, description_hash) DO NOTHING
         """
         try:
             await self._database_client.executemany(query, args_list)
@@ -63,6 +61,7 @@ class JobRepository:
 
     async def mark_sent_by_id(self, job_id: int) -> bool:
         """Set status to done for a specific row id. Returns True if a row was updated."""
+        #TODO: need to udpate here
         table = DatabaseTables.JOB_TABLE.value
         query = f"UPDATE {table} SET status = $2 WHERE id = $1"
         try:
@@ -78,6 +77,7 @@ class JobRepository:
         Convenience helper when you don't have the numeric id:
         updates the row identified by (company, job_link, description_hash).
         """
+        #TODO: need to remove if not useful
         table = DatabaseTables.JOB_TABLE.value
         h = compute_hash(job_description or "")
         query = f"""

@@ -3,7 +3,8 @@ from enum import Enum
 
 class DatabaseTables(Enum):
     "Tables names in database"
-    COMPANY_TABLE = 'companies'
+    JOB_PLATFORM_TABLE = 'job_platforms'
+    COMPANIES_JOB_SOURCES_TABLE = 'companies_job_sources'
     USER_TABLE = 'users'
     JOB_TABLE = 'jobs'
     JOB_NOTIFICATION_TARGETS_TABLE = 'job_notification_targets'

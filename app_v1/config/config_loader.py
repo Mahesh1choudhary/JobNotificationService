@@ -4,16 +4,10 @@ from typing import Union, Type, TypeVar
 from enum import Enum
 
 from app_v1.commons.service_logger import setup_logger
-from app_v1.config.config_classes_and_constants import EnvironmentConfigClass, GreenhousePollingConfig
+from app_v1.config.config_classes_and_constants import EnvironmentConfigClass
 
 logger = setup_logger()
 T = TypeVar("T")
-
-
-def project_root() -> Path:
-    """Project root (parent of `app_v1`), same base as config_data.json resolution in fetch_key_value."""
-    base_dir = Path(__file__).resolve().parent
-    return base_dir.parent.parent
 
 def fetch_key_value(key:Union[str,Enum], value_model: Type[T]) -> T:
     if isinstance(key, Enum):

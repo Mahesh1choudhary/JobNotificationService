@@ -20,7 +20,7 @@ class JobLocationNamespace(BaseNamespace[JobLocationVector]):
     def get_namespace_name(cls):
         return "job_location_namespace"
 
-    async def ingest_data(self, data: JobLocationVector):
+    async def ingest_embedding_data(self, data: JobLocationVector):
         #TODO: reconsider what to embed
         text_to_embed = f"{data.job_location}, {data.description}"
         embedding_model:EmbeddingModel = llm_manager.get_embedding_model()
