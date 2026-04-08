@@ -2,6 +2,7 @@ import asyncio
 import json
 import time
 from html import unescape
+from pathlib import Path
 from typing import Any
 
 import requests
@@ -9,14 +10,19 @@ from app_v1.config.config_keys import GREENHOUSE_POLLING_CONFIG_KEY
 from app_v1.config.config_classes_and_constants import GreenhousePollingConfig
 from app_v1.commons.service_logger import setup_logger
 from app_v1.config.config_loader import (
-    fetch_key_value,
-    project_root,
+    fetch_key_value
 )
 from app_v1.database.database_client import BaseDatabaseClient
 from app_v1.database.repository.job_repository import JobRepository
 from app_v1.models.request_models.job_creation_request import JobCreationRequest
 
 logger = setup_logger()
+
+
+def project_root() -> Path:
+    """Project root (parent of `app_v1`), same base as config_data.json resolution in fetch_key_value."""
+    base_dir = Path(__file__).resolve().parent
+    return base_dir.parent.parent
 
 
 class GreenhouseJobPollingService:

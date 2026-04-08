@@ -1,13 +1,22 @@
 
 
----1 companies table
-CREATE TABLE IF NOT EXISTS companies (
-    company_id SERIAL PRIMARY KEY,
+-- job_platforms table
+CREATE TABLE IF NOT EXISTS job_platforms (
+    id SERIAL PRIMARY KEY,
+    platform_name TEXT NOT NULL UNIQUE
+);
 
-    -- 'UNIQUE' automatically creates index
-    company_name VARCHAR(255) UNIQUE NOT NULL,
-    job_list_fetch_url TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+
+
+---1 companies table
+CREATE TABLE IF NOT EXISTS companies_job_sources (
+    id SERIAL PRIMARY KEY,
+    company_id INTEGER REFERENCES job_company_names(id) ON DELETE CASCADE,
+    platform_id INTEGER REFERENCES job_platforms(id),
+    fetch_job_list_url TEXT NOT NULL,
+    last_fetched_at TIMESTAMP WITH TIME ZONE,
+
+    CONSTRAINT unique_source_per_company UNIQUE (company_id, platform_id, fetch_job_list_url)
 );
 --- by default index on company_id and company_name
 
@@ -19,7 +28,7 @@ CREATE TABLE IF NOT EXISTS users (
     user_name VARCHAR(255) UNIQUE NOT NULL,
     user_email VARCHAR(255) UNIQUE NOT NULL,
     user_telegram_user_name TEXT UNIQUE NOT NULL,
-    user_telegram_chat_id BIGINT
+    user_telegram_chat_id BIGINT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -55,7 +64,7 @@ CREATE TABLE IF NOT EXISTS user_quota (
     total_count INT NOT NULL CHECK (total_count >= 0),
     used_count INT NOT NULL DEFAULT 0 CHECK (used_count >= 0)
     CHECK (used_count <= total_count)
-)
+);
 --- by default index on user_id
 
 
@@ -69,7 +78,7 @@ CREATE TABLE IF NOT EXISTS job_company_names (
     company_name TEXT NOT NULL UNIQUE,
     description TEXT,
     embedding vector(1536)
-)
+);
 CREATE INDEX ON job_company_names
 USING hnsw(embedding vector_cosine_ops);
 --- TODO: need to check other embeddings -> also currently using cosine rule, so when updated, update everwhere
@@ -81,6 +90,6 @@ CREATE TABLE IF NOT EXISTS job_locations (
     job_location TEXT NOT NULL UNIQUE,
     description TEXT,
     embedding vector(1536)
-)
+);
 CREATE INDEX ON job_locations
 USING hnsw (embedding vector_cosine_ops)

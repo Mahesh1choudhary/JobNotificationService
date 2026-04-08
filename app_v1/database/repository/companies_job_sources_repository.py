@@ -1,0 +1,83 @@
+from typing import List
+
+from app_v1.commons.service_logger import setup_logger
+from app_v1.database.database_client import BaseDatabaseClient
+from app_v1.database.database_models.company_job_source_model import CompanyJobSourceModel
+from app_v1.database.tables import DatabaseTables
+
+logger = setup_logger()
+
+class CompaniesJobSourcesRepository():
+
+    def __init__(self, database_client:BaseDatabaseClient):
+        self._database_client = database_client
+
+    async def insert_new_company_job_source(self, company_job_source_data:CompanyJobSourceModel) -> None:
+        query = f"""
+            WITH company_name_table AS (
+            SELECT id FROM {DatabaseTables.JOB_COMPANY_NAME_TABLE.value} WHERE company_name = $1
+            ),
+            platform_table AS (
+                SELECT id FROM {DatabaseTables.JOB_PLATFORM_TABLE.value} WHERE platform_name = $2
+            )
+            INSERT INTO {DatabaseTables.COMPANIES_JOB_SOURCES_TABLE.value} 
+                (company_id, platform_id, fetch_job_list_url)
+            SELECT company_name_table.id, platform_table.id, $3
+            FROM company_name_table, platform_table
+            ON CONFLICT (company_id, platform_id, fetch_job_list_url) 
+            DO NOTHING
+        """
+
+        try:
+            #TODO: should log whether row is added or not
+            await self._database_client.execute(query, company_job_source_data.company_name, company_job_source_data.platform_name,
+                                                       company_job_source_data.fetch_job_list_url)
+        except Exception as exc:
+            logger.error(f"Database Error in insert_new_company_job_source data: {company_job_source_data}", exc_info=True)
+            raise
+
+    async def update_company_job_source_last_fetched_at(self, company_job_source_data:CompanyJobSourceModel) -> None:
+        query = f"""
+            UPDATE  {DatabaseTables.COMPANIES_JOB_SOURCES_TABLE.value}
+            SET last_fetched_at = $4
+            where company_id = $1 and platform_id = $2 and fetch_job_list_url = $3
+        """
+        try:
+            await self._database_client.execute(query, company_job_source_data.company_id, company_job_source_data.platform_id,
+                                                 company_job_source_data.fetch_job_list_url, company_job_source_data.last_fetched_at)
+        except Exception as exc:
+            logger.error(f"Database Error in iupdate_company_job_source_last_fetched_at fora: {company_job_source_data}", exc_info=True)
+            raise
+
+    async def get_companies_job_source_data(self, offset:int, limit:int) -> List[CompanyJobSourceModel]:
+        query = f"""
+            SELECT  cjs.id, cjs.company_id, cjs.platform_id, cjs.fetch_job_list_url, cjs.last_fetched_at,
+             jp.platform_name, jcn.company_name
+            FROM {DatabaseTables.COMPANIES_JOB_SOURCES_TABLE.value} cjs
+            JOIN
+            {DatabaseTables.JOB_PLATFORM_TABLE.value} jp
+                ON cjs.platform_id = jp.id
+            JOIN {DatabaseTables.JOB_COMPANY_NAME_TABLE.value} jcn
+                ON cjs.company_id = jcn.id
+            ORDER BY cjs.id
+            OFFSET $1 LIMIT $2
+        """
+
+        try:
+            rows = await self._database_client.fetch(query, offset, limit)
+            return [CompanyJobSourceModel(**dict(row)) for row in rows]
+        except Exception as exc:
+            logger.error(f"Database Error in get_company_job_source_data", exc_info=True)
+            raise
+
+
+    async def get_total_entries_count(self) -> int:
+        query = f"""
+            SELECT COUNT(*) FROM {DatabaseTables.COMPANIES_JOB_SOURCES_TABLE.value}
+        """
+        try:
+            row = await self._database_client.fetchrow(query)
+            return row[0] if row else 0
+        except Exception as exc:
+            logger.error(f"Database Error in get_total_entries_count", exc_info=True)
+            raise
