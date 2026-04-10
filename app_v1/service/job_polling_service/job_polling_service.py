@@ -4,6 +4,10 @@ from typing import List
 
 from app_v1.commons.service_logger import setup_logger
 from app_v1.commons.time_utils import get_as_utc, utc_now
+from app_v1.config.config_keys import SAME_COMPANY_POLLING_GAP_IN_SECONDS, JOB_RETENTION_PERIOD_IN_DAYS, \
+    COMPANY_BATCH_SIZE_FOR_POLLING
+from app_v1.config.config_loader import fetch_key_value
+from app_v1.database import database_client
 from app_v1.database.database_client import BaseDatabaseClient
 from app_v1.database.database_models.company_job_source_model import CompanyJobSourceModel
 from app_v1.database.database_models.job_model import Job, JobProcessingStatus
@@ -22,10 +26,11 @@ class JobPollingService():
 
     def __init__(self, database_client:BaseDatabaseClient):
         self._companies_job_sources_repository = CompaniesJobSourcesRepository(database_client)
-        self._next_fetch_gap_seconds= 10*60 # 10 minutes gap between fetching same company data
+        self._next_fetch_gap_seconds= fetch_key_value(SAME_COMPANY_POLLING_GAP_IN_SECONDS, int) # gap between fetching same company data
         self._job_repository = JobRepository(database_client)
         self._job_notification_service = JobNotificationService(database_client)
-        self._job_retention_period = timedelta(days=2) # 2 day old job will be removed from db whether processed or not
+        self._job_retention_period = timedelta(days= fetch_key_value(JOB_RETENTION_PERIOD_IN_DAYS, int)) # given days old job will not be processed if still unprocessed
+        self._company_batch_size_for_polling = fetch_key_value(COMPANY_BATCH_SIZE_FOR_POLLING, int)
 
 
     async def _poll_single_company_for_jobs(self, job_company_job_source:CompanyJobSourceModel):
@@ -102,11 +107,10 @@ class JobPollingService():
                 if total_entries == 0:
                     logger.warning(f"[{self.__class__.__name__}]-[{self.start_polling.__name__}]: no entries to poll for")
 
-                batch_size = 5 #TODO: should be config driven
-                for offset in range(0, total_entries, batch_size):
+                for offset in range(0, total_entries, self._company_batch_size_for_polling):
                     batch_job_sources:List[CompanyJobSourceModel] = await self._companies_job_sources_repository.get_companies_job_source_data(
                         offset=offset,
-                        limit=batch_size
+                        limit=self._company_batch_size_for_polling
                     )
 
                     tasks = [self._poll_single_company_for_jobs(company_job_source_data) for company_job_source_data in batch_job_sources]

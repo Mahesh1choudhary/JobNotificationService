@@ -144,7 +144,7 @@ CREATE INDEX idx_job_departments_fts ON job_departments USING GIN (fts_tokens);
 CREATE TABLE jobs (
   id SERIAL PRIMARY KEY,
   job_company_id INTEGER NOT NULL,
-  job_internal_id INTEGER NOT NULL,
+  job_internal_id BIGINT NOT NULL,
   job_link TEXT,
   job_description TEXT NOT NULL,
   job_description_hash TEXT,
