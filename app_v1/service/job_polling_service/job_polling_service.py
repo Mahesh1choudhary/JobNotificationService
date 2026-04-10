@@ -4,6 +4,7 @@ from datetime import datetime, timezone, timedelta
 from typing import List
 
 from app_v1.commons.service_logger import setup_logger
+from app_v1.commons.time_utils import get_as_utc, utc_now
 from app_v1.database import database_client
 from app_v1.database.database_client import BaseDatabaseClient
 from app_v1.database.database_config import DatabaseConfigFactory
@@ -44,7 +45,8 @@ class JobPollingService():
         if last_fetched_at is not None:
             #TODO: check time zone here, last fetched at should also be in same time zone
             #TODO: currently limited is same for all, in future should be different fro each platform if needed
-            time_after_last_fetched_seconds = (datetime.now(timezone.utc) - last_fetched_at).total_seconds()
+            last_fetched_at_utc = get_as_utc(last_fetched_at)
+            time_after_last_fetched_seconds = (utc_now() - last_fetched_at_utc).total_seconds()
             time_to_wait_seconds = self._next_fetch_gap_seconds - time_after_last_fetched_seconds
             if time_to_wait_seconds > 0:
                 await asyncio.sleep(time_to_wait_seconds)
@@ -68,7 +70,7 @@ class JobPollingService():
             #fetching and processing any pending jobs
             #TODO: should fetch in batches - not all at once
             # fetching pending jobs that came after cut_off_timestamp
-            cutoff_timestamp: datetime = datetime.now(timezone.utc) - self._job_retention_period
+            cutoff_timestamp: datetime = utc_now() - self._job_retention_period
             all_pending_jobs: List[Job] = await self._job_repository.get_jobs_by_job_processing_status(JobProcessingStatus.PENDING, cutoff_timestamp, 5000,0)
             tasks = [self._job_notification_service.generate_tags_and_send_notifications(job) for job in all_pending_jobs]
             results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -108,7 +110,7 @@ class JobPollingService():
                     await asyncio.gather(*tasks, return_exceptions=True)
 
                 #TODO: cannot delete jobs as the next fetch will bring them again and will udpate in database- need to think of solution
-                #cutoff_timestamp: datetime = datetime.now(timezone.utc)- self._job_retention_period
+                #cutoff_timestamp: datetime = utc_now() - self._job_retention_period
                 #await self._job_repository.remove_old_jobs(cutoff_timestamp) # deleting jobs that came before cutoff_timestamp
             except Exception as exc:
                 logger.error(f"Exception occurred in start_polling: {exc}")

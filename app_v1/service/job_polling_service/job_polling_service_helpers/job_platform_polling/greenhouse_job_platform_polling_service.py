@@ -1,13 +1,11 @@
 import asyncio
-from datetime import datetime, timezone
 from typing import List
 
 import httpx
-from sqlalchemy import true
 
 from app_v1.commons.service_logger import setup_logger
+from app_v1.commons.time_utils import utc_now
 from app_v1.database.database_models.company_job_source_model import CompanyJobSourceModel
-from app_v1.database.repository.job_repository import JobRepository
 from app_v1.models.request_models.job_creation_request import JobCreationRequest
 from app_v1.service.job_polling_service.job_polling_service_helpers.job_platform_polling.base_job_platform_polling_service import JobPlatformPollingService
 
@@ -27,7 +25,7 @@ class GreenhouseJobPlatformPollingService(JobPlatformPollingService):
                 response = await client.get(fetch_job_list_url)
 
             #TODO: need to check the timezone
-            company_job_source.last_fetched_at = datetime.now(timezone.utc)
+            company_job_source.last_fetched_at = utc_now()
 
             company_jobs_data = response.json().get("jobs", None)
             if company_jobs_data is None:

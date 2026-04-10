@@ -1,19 +1,15 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Sequence, List
 
 from app_v1.commons.hash_function import compute_hash
 from app_v1.commons.service_logger import setup_logger
+from app_v1.commons.time_utils import utc_now
 from app_v1.database.database_client import BaseDatabaseClient
 from app_v1.database.database_models.job_model import Job, JobProcessingStatus
 from app_v1.database.tables import DatabaseTables
 from app_v1.models.request_models.job_creation_request import JobCreationRequest
 
 logger = setup_logger()
-
-
-def _utc_now_naive() -> datetime:
-    #TODO: need to check here
-    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class JobRepository:
@@ -24,8 +20,7 @@ class JobRepository:
         """Insert rows; duplicates (same company, job_link, description_hash) are skipped."""
         if not rows:
             return []
-        #TODO: need to check the time here
-        now = _utc_now_naive()
+        now = utc_now()
         args_list = []
         for r in rows:
             job_description = r.job_description
