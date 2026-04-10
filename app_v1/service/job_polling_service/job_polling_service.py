@@ -25,7 +25,7 @@ class JobPollingService():
 
     def __init__(self, database_client:BaseDatabaseClient):
         self._companies_job_sources_repository = CompaniesJobSourcesRepository(database_client)
-        self._next_fetch_gap_seconds= 10*60 # 10 minutes gap between fetching same company data
+        self._next_fetch_gap_seconds= 10 # 10 minutes gap between fetching same company data
         self._job_repository = JobRepository(database_client)
         self._job_notification_service = JobNotificationService(database_client)
         self._job_retention_period = timedelta(days=2) # 2 day old job will be removed from db whether processed or not

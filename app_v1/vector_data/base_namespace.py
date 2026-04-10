@@ -14,5 +14,9 @@ class BaseNamespace(ABC, Generic[T]):
         pass
 
     @abstractmethod
+    async def ingest_embedding_data_batch(self, data_list: list[T]) -> None:
+        pass
+
+    @abstractmethod
     async def get_closest_matches(self, item: str, similarity_threshold: float,limit:int = 5) -> T:
         pass

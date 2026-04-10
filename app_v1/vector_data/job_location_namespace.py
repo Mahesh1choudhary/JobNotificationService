@@ -1,5 +1,5 @@
 from typing import List, Dict
-
+import asyncio
 from app_v1.database.database_client import BaseDatabaseClient
 from app_v1.database.database_config import DatabaseConfigFactory
 from app_v1.database.database_manager import DatabaseManager
@@ -33,6 +33,26 @@ class JobLocationNamespace(BaseNamespace[JobLocationVector]):
         #TODO: column name "embedding" is hard coded at most places, recheck
         data_to_insert["embedding"] = embeddings
         await self._job_location_vector_repository.insert_record(data_to_insert)
+
+    async def ingest_embedding_data_batch(self, data_list: List[JobLocationVector]):
+        if not data_list:
+            return
+        embedding_model: EmbeddingModel = llm_manager.get_embedding_model()
+        # Prepare texts for embedding
+        texts_to_embed = [f"{d.job_location}, {d.description}" for d in data_list]
+        # Get embeddings concurrently
+        embeddings = await asyncio.gather(*[embedding_model.get_embeddings(text) for text in texts_to_embed])
+        # Prepare data dicts with embeddings
+        data_dicts = []
+        for d, emb in zip(data_list, embeddings):
+            data_to_insert = d.model_dump()
+            data_to_insert["embedding"] = emb
+            data_dicts.append(data_to_insert)
+        # Insert in batches of 100
+        for i in range(0, len(data_dicts), 100):
+            batch = data_dicts[i:i+100]
+            await self._job_location_vector_repository.insert_records(batch)
+
 
     async def get_closest_matches(self, item: str, similarity_threshold: float,limit:int = 5, ranking_constant:int = 60) -> List[JobLocationVector]:
         #TODO: this can give wrong results as it tries to find best match, so completely different words can be best match if no other match is present
