@@ -6,6 +6,7 @@ from app_v1.commons.service_logger import setup_logger
 from app_v1.database.database_client import BaseDatabaseClient
 from app_v1.database.database_config import DatabaseConfigFactory
 from app_v1.database.database_manager import DatabaseManager
+from app_v1.database.database_models.job_model import Job, JobProcessingStatus
 from app_v1.database.repository.job_notification_target_repository import JobNotificationTargetRepository
 from app_v1.llm.llm_manager import LLMManager
 from app_v1.llm.llm_model.embedding_model import EmbeddingModel
@@ -19,6 +20,7 @@ from app_v1.service.notification_service.notification_service_helpers.event_mode
 from app_v1.service.notification_service.notification_service_helpers.event_publishers import InMemoryEventPublisher
 from app_v1.service.notification_service.notification_service_helpers.notification_payload import JobNotificationPayload
 from app_v1.vector_data.job_company_name_namespace import JobCompanyNameNamespace
+from app_v1.vector_data.job_department_name_namespace import JobDepartmentNameNamespace
 from app_v1.vector_data.job_location_namespace import JobLocationNamespace
 
 logger = setup_logger()
@@ -31,7 +33,9 @@ class JobNotificationService:
         self._agent = TagGenerationAgent()
         self._job_company_name_namespace = JobCompanyNameNamespace(database_client)
         self._job_location_namespace = JobLocationNamespace(database_client)
+        self._job_department_name_namespace = JobDepartmentNameNamespace(database_client)
         self._job_notification_target_repository = JobNotificationTargetRepository(database_client)
+        self._similarity_threshold = 0.6 #TODO: should be config driven
 
         #TODO: in future all  handler, event bus setup,etc should be at a common separate place- maybe in fastapi lifespan
         #setting up handlers and event bus for job event
@@ -51,12 +55,16 @@ class JobNotificationService:
         response = response.model_dump()
         return JobTagResponse(**response)
 
-    async def generate_tags_and_send_notifications(self, job_content: str):
+    async def generate_tags_and_send_notifications(self, job_data: Job) -> JobProcessingStatus:
         try:
-            job_tag_response:JobTagResponse = await self.generate_tags(job_content)
-            #TODO: job_link is optional in the job tag response, if during scraping we can find, then we will just update
 
-            job_tag_response = await self.update_by_closest_matches(job_tag_response)
+            job_tag_response:JobTagResponse = await self.generate_tags(job_data.job_description)
+
+            #TODO: job_data has company_id, so company name can come from there
+            job_tag_response.job_link = job_data.job_link
+            job_tag_response, eligible_for_sending = await self.update_by_closest_matches(job_tag_response)
+            if not eligible_for_sending:
+                return JobProcessingStatus.SKIPPED
 
             # adding combination row in interest/job_notification_target table- will be ignored if already present
             await self.add_new_interest_row(job_tag_response)
@@ -65,24 +73,38 @@ class JobNotificationService:
 
             job_event = JobEvent(event_type=EventType.JOB_EVENT, job_tag_response=job_tag_response, job_notification_payload= notification_payload)
             await self._event_publisher.publish(job_event)
+
+            return JobProcessingStatus.PROCESSED
         except Exception as exc:
             logger.error("Error in generate_tags_and_send_notifications", exc_info=True)
-            raise
+            return JobProcessingStatus.PENDING
 
-    async def update_by_closest_matches(self, job_tag_response:JobTagResponse) -> JobTagResponse:
+    async def update_by_closest_matches(self, job_tag_response:JobTagResponse) -> (JobTagResponse, bool):
 
+        job_tag_response.job_company_name = job_tag_response.job_company_name.lower() # everthing should be in lower case
         #TODO: for now just for company_name and location, need to add for others. If best match is not found , will throw error
-        best_match_job_company_names = await self._job_company_name_namespace.get_closest_matches(job_tag_response.job_company_name.lower(), 1)
+        best_match_job_company_names = await self._job_company_name_namespace.get_closest_matches(job_tag_response.job_company_name, self._similarity_threshold, 1)
         if not best_match_job_company_names:
-            raise ValueError(f"No best match found for company_name: {job_tag_response.job_company_name}")
+            logger.warning(f"No best match found for company_name: {job_tag_response.job_company_name}")
+            return job_tag_response, False
         job_tag_response.job_company_name = best_match_job_company_names[0].company_name
 
-        best_match_job_locations = await self._job_location_namespace.get_closest_matches(job_tag_response.job_location.lower(), 1)
+        job_tag_response.job_location = job_tag_response.job_location.lower()
+        best_match_job_locations = await self._job_location_namespace.get_closest_matches(job_tag_response.job_location, self._similarity_threshold, 1)
         if not best_match_job_locations:
-            raise ValueError(f"No best match found for location: {job_tag_response.job_location}")
-        job_tag_response.job_location = best_match_job_locations[0].job_location.lower()
+            logger.warning(f"No best match found for location: {job_tag_response.job_location}")
+            return job_tag_response, False
+        job_tag_response.job_location = best_match_job_locations[0].job_location
 
-        return job_tag_response
+
+        job_tag_response.job_department = job_tag_response.job_department.lower()
+        best_match_department_names = await self._job_department_name_namespace.get_closest_matches(job_tag_response.job_department, self._similarity_threshold, 1)
+        if not best_match_department_names:
+            logger.warning(f"No best match found for department: {job_tag_response.job_department}")
+            return job_tag_response, False
+        job_tag_response.job_department = best_match_department_names[0].department_name
+
+        return job_tag_response, True
 
 
     async def add_new_interest_row(self, job_tag_response:JobTagResponse):

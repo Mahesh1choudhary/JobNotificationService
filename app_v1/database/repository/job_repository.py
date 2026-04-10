@@ -1,10 +1,10 @@
 from datetime import datetime, timezone
-from typing import Sequence
+from typing import Sequence, List
 
 from app_v1.commons.hash_function import compute_hash
 from app_v1.commons.service_logger import setup_logger
-from app_v1.database.database_client import PostgresSQLDatabaseClient, BaseDatabaseClient
-from app_v1.database.database_models.job_model import Job, JobStatus
+from app_v1.database.database_client import BaseDatabaseClient
+from app_v1.database.database_models.job_model import Job, JobProcessingStatus
 from app_v1.database.tables import DatabaseTables
 from app_v1.models.request_models.job_creation_request import JobCreationRequest
 
@@ -20,79 +20,64 @@ class JobRepository:
     def __init__(self, database_client: BaseDatabaseClient):
         self._database_client = database_client
 
-    async def insert_jobs_ignore_duplicates(self, rows: Sequence[JobCreationRequest]) -> int:
-        """Insert rows; duplicates (same company, job_link, description_hash) are skipped. Returns rows submitted."""
+    async def insert_jobs_ignore_duplicates(self, rows: Sequence[JobCreationRequest]) -> None:
+        """Insert rows; duplicates (same company, job_link, description_hash) are skipped."""
         if not rows:
-            return 0
+            return []
+        #TODO: need to check the time here
         now = _utc_now_naive()
         args_list = []
         for r in rows:
-            desc = r.job_description or ""
-            h = compute_hash(desc)
-            args_list.append((r.company, r.job_link, r.job_id, r.job_description, h, now, JobStatus.PENDING.value))
+            job_description = r.job_description
+            job_description_hash = compute_hash(job_description)
+            args_list.append((r.job_company_id, r.job_link, job_description, job_description_hash, now, JobProcessingStatus.PENDING.value))
 
         query = f"""
-            INSERT INTO {DatabaseTables.JOB_TABLE.value} (company, job_link, job_id, job_description, description_hash, created_at, status)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
-            ON CONFLICT (company, job_link, description_hash) DO NOTHING
+            INSERT INTO {DatabaseTables.JOB_TABLE.value} (job_company_id, job_link, job_description, job_description_hash, created_at, job_processing_status)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            ON CONFLICT (job_company_id, job_link, job_description_hash) DO NOTHING
+            RETURNING id, job_company_id, job_link, job_description, job_description_hash, created_at, job_processing_status
         """
         try:
             await self._database_client.executemany(query, args_list)
         except Exception:
             logger.error("Database error in insert_jobs_ignore_duplicates", exc_info=True)
             raise
-        return len(args_list)
 
-    async def list_pending(self, *, limit: int = 1000, offset: int = 0) -> list[Job]:
-        table = DatabaseTables.JOB_TABLE.value
+    async def get_jobs_by_job_processing_status(self, job_processing_status: JobProcessingStatus, cutoff_timestamp:datetime, limit: int = 20, offset: int = 0) -> list[Job]:
         query = f"""
-        SELECT id, company, job_link, job_id, job_description, description_hash, created_at, status
-        FROM {table}
-        WHERE status = $1
-        ORDER BY created_at ASC, id ASC
-        LIMIT $2 OFFSET $3
+            SELECT id, job_company_id, job_link, job_description, job_description_hash, created_at, job_processing_status
+            FROM {DatabaseTables.JOB_TABLE.value}
+            WHERE job_processing_status = $1 AND created_at > $2
+            ORDER BY created_at DESC, id ASC
+            LIMIT $3 OFFSET $4
         """
         try:
-            rows = await self._database_client.fetch(query, JobStatus.PENDING.value, limit, offset)
+            rows = await self._database_client.fetch(query, job_processing_status, cutoff_timestamp, limit, offset)
+            return [Job(**dict(r)) for r in rows]
         except Exception:
-            logger.error("Database error in list_pending", exc_info=True)
+            logger.error(f"Database error in {self.get_jobs_by_job_processing_status.__name__}", exc_info=True)
             raise
-        return [Job(**dict(r)) for r in rows]
 
-    async def mark_sent_by_id(self, job_id: int) -> bool:
-        """Set status to done for a specific row id. Returns True if a row was updated."""
-        #TODO: need to udpate here
-        table = DatabaseTables.JOB_TABLE.value
-        query = f"UPDATE {table} SET status = $2 WHERE id = $1"
-        try:
-            result = await self._database_client.execute(query, job_id, JobStatus.DONE.value)
-        except Exception:
-            logger.error("Database error in mark_sent_by_id id=%s", job_id, exc_info=True)
-            raise
-        # asyncpg returns strings like: "UPDATE 1"
-        return str(result).strip().upper().endswith(" 1")
-
-    async def mark_sent_by_unique_key(self, *, company: str, job_link: str, job_description: str | None) -> bool:
-        """
-        Convenience helper when you don't have the numeric id:
-        updates the row identified by (company, job_link, description_hash).
-        """
-        #TODO: need to remove if not useful
-        table = DatabaseTables.JOB_TABLE.value
-        h = compute_hash(job_description or "")
+    async def update_job_processing_status_by_id(self, job_ids: List[int], job_processing_status:JobProcessingStatus) -> None:
+        """Set status to done for a given jobs rows"""
         query = f"""
-        UPDATE {table}
-        SET status = $4
-        WHERE company = $1 AND job_link = $2 AND description_hash = $3
+            UPDATE {DatabaseTables.JOB_TABLE.value} SET job_processing_status = $2 WHERE id = ANY($1)
         """
         try:
-            result = await self._database_client.execute(query, company, job_link, h, JobStatus.DONE.value)
+            await self._database_client.execute(query, job_ids, job_processing_status)
         except Exception:
-            logger.error(
-                "Database error in mark_sent_by_unique_key company=%s job_link=%s",
-                company,
-                job_link,
-                exc_info=True,
-            )
+            logger.error(f"Database error in {self.update_job_processing_status_by_id.__name__} for job_ids: {job_ids}", exc_info=True)
             raise
-        return str(result).strip().upper().endswith(" 1")
+
+
+    async def remove_old_jobs(self, cutoff_timestamp: datetime) -> None:
+        query = f"""
+            DELETE FROM {DatabaseTables.JOB_TABLE.value} 
+            WHERE created_at < $1  
+        """
+        try:
+            await self._database_client.execute(query, cutoff_timestamp)
+        except Exception:
+            logger.error(f"Database error in {self.remove_old_jobs.__name__}", exc_info=True)
+            raise

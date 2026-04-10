@@ -8,10 +8,11 @@ from pydantic import BaseModel
 class JobProcessingStatus(str, Enum):
     PENDING = "pending"
     PROCESSED = "processed"
+    SKIPPED = "skipped"
 
 class Job(BaseModel):
     id: int
-    job_company_name: str
+    job_company_id: int
     job_link: str
     job_description: str | None
     job_description_hash: str

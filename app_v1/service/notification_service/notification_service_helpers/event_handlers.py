@@ -22,6 +22,8 @@ class JobEventHandler(BaseEventHandler):
     async def handle_event(self, event: JobEvent):
         try:
             target_users: list[User] = await self._job_notification_targets_service.find_job_notification_target_users(event.job_tag_response)
+            if not target_users:
+                return
 
             await self._notification_service.send_notification_to_targets(target_users= target_users, notification_payload= event.job_notification_payload)
         except Exception as exc:

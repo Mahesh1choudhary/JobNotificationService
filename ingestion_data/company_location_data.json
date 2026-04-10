@@ -100,6 +100,10 @@
     {
       "job_location": "remote",
       "description": "work from home, wfh, anywhere"
+    },
+    {
+      "job_location": "paris, france",
+      "description": ""
     }
 
   ]

@@ -92,4 +92,37 @@ CREATE TABLE IF NOT EXISTS job_locations (
     embedding vector(1536)
 );
 CREATE INDEX ON job_locations
-USING hnsw (embedding vector_cosine_ops)
+USING hnsw (embedding vector_cosine_ops);
+
+
+
+
+--- Job department vector table
+CREATE TABLE IF NOT EXISTS job_departments (
+   id SERIAL PRIMARY KEY,
+   department_name TEXT NOT NULL UNIQUE,
+   description TEXT,
+   embedding vector(1536)
+);
+CREATE INDEX ON job_departments
+USING hnsw (embedding vector_cosine_ops);
+
+
+
+
+--- Jobs table
+CREATE TABLE jobs (
+  id SERIAL PRIMARY KEY,
+  job_company_id INTEGER NOT NULL,
+  job_link TEXT,
+  job_description TEXT NOT NULL,
+  job_description_hash TEXT,
+  job_processing_status TEXT NOT NULL DEFAULT 'pending'
+      CHECK (job_processing_status IN ('pending', 'processed', 'skipped')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+  UNIQUE(job_company_id, job_link, job_description_hash)
+);
+
+

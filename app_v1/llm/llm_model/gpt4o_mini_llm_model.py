@@ -45,11 +45,18 @@ class GPT4OMiniLLMModel(LLMModel):
                 - "Intern" if internship
                 - "FullTime" if full-time roles
             - `job_experience_level`: years of experience of person. Decide based on minimum year of experience required for job
-                - Entry if minimum year of experience required is in [0,2)
+                - ENTRY = if minimum year of experience required is in [0,2)
                 - JUNIOR = if minimum year of experience required is in [2,4)
                 - MID = if minimum year of experience required is in [4,6)
                 - SENIOR = if minimum year of experience required is in [6,10)
-                - EXPERT = if minimum year of experience required is more than 10
+                - EXPERT = if minimum year of experience required is 10+
+                
+                ***Rules for finding `job_experience_level`***:
+                    - First find the minimum year of experience required from the `job_description`. Now map this to only one of the available options
+                    - Select only from the available options- ( ENTRY, JUNIOR, MID, SENIOR, EXPERT)
+                    - Examples:
+                        - If experience required is 5-6, then minimum year of experience is 5 which falls into Entry = [4,6) option
+                        - If experience required is 12, then it falls into Expert = 10+ option
             - `job_location`: string -> Location of the job. Should be city name, Country name or remote if applicable
             - `job_department`: string -> Department based on job work. Examples- Engineering, Sales, Finance, etc
             - `job_link`: string | None -> link to the job
