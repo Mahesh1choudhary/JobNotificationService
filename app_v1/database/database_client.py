@@ -67,6 +67,10 @@ class PostgresSQLDatabaseClient(BaseDatabaseClient):
 
                 #database_url = f"postgresql+asyncpg://{self._database_config.postgresSQL_db_name}:{self._database_config.postgresSQL_db_password}@{self._database_config.postgresSQL_db_host}:{self._database_config.postgresSQL_db_port}/{self._database_config.postgresSQL_db_name}?sslmode=require"
 
+                async def _init_connection(conn: asyncpg.Connection) -> None:
+                    # Keep all TIMESTAMPTZ input/output in UTC for this session.
+                    await conn.execute("SET TIME ZONE 'UTC'")
+
                 self._connection_pool = await asyncpg.create_pool(
                     user= self._database_config.postgresSQL_db_user,
                     password= self._database_config.postgresSQL_db_password,
@@ -76,6 +80,7 @@ class PostgresSQLDatabaseClient(BaseDatabaseClient):
                     ssl="require",
                     min_size= self._database_config.postgresSQL_db_connection_pool_min,
                     max_size= self._database_config.postgresSQL_db_connection_pool_max,
+                    init=_init_connection,
                 )
                 self._initialized = True
             logger.info("PostgresSQL database client initialized")

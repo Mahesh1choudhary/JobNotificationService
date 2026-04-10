@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS job_notification_targets (
     job_location TEXT NOT NULL,
     company_name TEXT NOT NULL,
     user_ids INT[] NOT NULL DEFAULT '{}',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 
     -- This constraint ensures only your Enum values can be inserted
     CONSTRAINT valid_experience_level CHECK (
