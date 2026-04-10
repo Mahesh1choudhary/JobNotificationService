@@ -68,26 +68,3 @@ class JobLocationNamespace(BaseNamespace[JobLocationVector]):
             final_results.append(data_objects[item])
 
         return final_results
-
-
-
-
-async def main():
-    llm_manager = LLMManager()
-    llm_manager.set_tag_generation_model(GPT4OMiniLLMModel())
-    llm_manager.set_embedding_model(EmbeddingModel())
-
-    database_config = DatabaseConfigFactory.create_database_config()
-    database_manager = DatabaseManager(database_config)
-    await database_manager.init()
-
-    job_location_namespace = JobLocationNamespace(database_manager.database_client)
-
-    locations = ["bangalore"]
-    for l in locations:
-        await job_location_namespace.get_closest_matches(l,1)
-
-
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
