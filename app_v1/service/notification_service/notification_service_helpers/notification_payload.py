@@ -7,7 +7,6 @@ class BaseNotificationPayload(ABC):
     pass
 
 
-#TODO: will job link be part of JobTagResponse or need to separately add in JobNotidicationPayload
 class JobNotificationPayload(JobTagResponse, BaseNotificationPayload):
     pass
 

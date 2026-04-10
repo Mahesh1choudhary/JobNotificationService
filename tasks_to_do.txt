@@ -68,3 +68,8 @@ STATUS - PENDING
 
 20 -> A job can be present in multiple locations, currently we are considering single location only -> need to add support for this
 STATUS - PENDING
+
+
+
+21 -> Add extra column in company_job_sources for deciding whether to poll this company or not
+STATS - PENDINGTODO

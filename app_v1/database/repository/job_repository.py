@@ -3,7 +3,7 @@ from typing import Sequence, List
 
 from app_v1.commons.hash_function import compute_hash
 from app_v1.commons.service_logger import setup_logger
-from app_v1.commons.time_utils import utc_now
+from app_v1.commons.time_utils import current_time_in_utc
 from app_v1.database.database_client import BaseDatabaseClient
 from app_v1.database.database_models.job_model import Job, JobProcessingStatus
 from app_v1.database.tables import DatabaseTables
@@ -28,12 +28,12 @@ class JobRepository:
             if not rows:
                 return []
             #TODO: need to check the time here
-            now = utc_now()
+            current_time = current_time_in_utc()
             args_list = []
             for r in rows:
                 job_description = r.job_description
                 job_description_hash = compute_hash(job_description)
-                args_list.append((r.job_company_id, r.job_internal_id, r.job_link, job_description, job_description_hash, now, JobProcessingStatus.PENDING.value))
+                args_list.append((r.job_company_id, r.job_internal_id, r.job_link, job_description, job_description_hash, current_time, JobProcessingStatus.PENDING.value))
 
             await self._database_client.executemany(query, args_list)
         except Exception:

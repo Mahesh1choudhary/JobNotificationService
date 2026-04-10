@@ -2,7 +2,7 @@
 
 -- job_platforms table
 CREATE TABLE IF NOT EXISTS job_platforms (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     platform_name TEXT NOT NULL UNIQUE
 );
 
@@ -10,9 +10,9 @@ CREATE TABLE IF NOT EXISTS job_platforms (
 
 ---1 companies table
 CREATE TABLE IF NOT EXISTS companies_job_sources (
-    id SERIAL PRIMARY KEY,
-    company_id INTEGER REFERENCES job_company_names(id) ON DELETE CASCADE,
-    platform_id INTEGER REFERENCES job_platforms(id),
+    id BIGSERIAL PRIMARY KEY,
+    company_id BIGINT REFERENCES job_company_names(id) ON DELETE CASCADE,
+    platform_id BIGINT REFERENCES job_platforms(id),
     fetch_job_list_url TEXT NOT NULL,
     last_fetched_at TIMESTAMP WITH TIME ZONE,
 
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS companies_job_sources (
 
 ---2 users table
 CREATE TABLE IF NOT EXISTS users (
-    user_id SERIAL PRIMARY KEY,
+    user_id BIGSERIAL PRIMARY KEY,
     user_name VARCHAR(255) UNIQUE NOT NULL,
     user_email VARCHAR(255) UNIQUE NOT NULL,
     user_telegram_user_name TEXT UNIQUE NOT NULL,
@@ -38,12 +38,12 @@ CREATE TABLE IF NOT EXISTS users (
 
 ---3 job notification target table
 CREATE TABLE IF NOT EXISTS job_notification_targets (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     job_experience_level TEXT NOT NULL,
     job_location TEXT NOT NULL,
     company_name TEXT NOT NULL,
-    user_ids INT[] NOT NULL DEFAULT '{}',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    user_ids BIGINT[] NOT NULL DEFAULT '{}',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     -- This constraint ensures only your Enum values can be inserted
     CONSTRAINT valid_experience_level CHECK (
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS job_notification_targets (
 
 ---4 user quota table
 CREATE TABLE IF NOT EXISTS user_quota (
-    user_id INT PRIMARY KEY,
+    user_id BIGINT PRIMARY KEY,
     total_count INT NOT NULL CHECK (total_count >= 0),
     used_count INT NOT NULL DEFAULT 0 CHECK (used_count >= 0)
     CHECK (used_count <= total_count)
@@ -78,7 +78,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
 
 --- Job company names vector table
 CREATE TABLE IF NOT EXISTS job_company_names (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     company_name TEXT NOT NULL UNIQUE,
     description TEXT,
     embedding vector(1536),
@@ -100,7 +100,7 @@ CREATE INDEX idx_job_company_names_fts ON job_company_names USING GIN (fts_token
 
 --- Job locations vector table
 CREATE TABLE IF NOT EXISTS job_locations (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     job_location TEXT NOT NULL UNIQUE,
     description TEXT,
     embedding vector(1536),
@@ -122,7 +122,7 @@ CREATE INDEX idx_job_locations_fts ON job_locations USING GIN (fts_tokens);
 
 --- Job department vector table
 CREATE TABLE IF NOT EXISTS job_departments (
-   id SERIAL PRIMARY KEY,
+   id BIGSERIAL PRIMARY KEY,
    department_name TEXT NOT NULL UNIQUE,
    description TEXT,
    embedding vector(1536),
@@ -142,9 +142,9 @@ CREATE INDEX idx_job_departments_fts ON job_departments USING GIN (fts_tokens);
 
 --- Jobs table
 CREATE TABLE jobs (
-  id SERIAL PRIMARY KEY,
-  job_company_id INTEGER NOT NULL,
-  job_internal_id INTEGER NOT NULL,
+  id BIGSERIAL PRIMARY KEY,
+  job_company_id BIGINT NOT NULL,
+  job_internal_id BIGINT NOT NULL,
   job_link TEXT,
   job_description TEXT NOT NULL,
   job_description_hash TEXT,

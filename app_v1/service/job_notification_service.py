@@ -3,6 +3,8 @@ from autogen_core import CancellationToken
 
 from app_v1.agent.tag_generation_agent import TagGenerationAgent
 from app_v1.commons.service_logger import setup_logger
+from app_v1.config.config_keys import SIMILARITY_THRESHOLD_FOR_VECTOR_SEARCH
+from app_v1.config.config_loader import fetch_key_value
 from app_v1.database.database_client import BaseDatabaseClient
 from app_v1.database.database_config import DatabaseConfigFactory
 from app_v1.database.database_manager import DatabaseManager
@@ -35,7 +37,7 @@ class JobNotificationService:
         self._job_location_namespace = JobLocationNamespace(database_client)
         self._job_department_name_namespace = JobDepartmentNameNamespace(database_client)
         self._job_notification_target_repository = JobNotificationTargetRepository(database_client)
-        self._similarity_threshold = 0.6 #TODO: should be config driven
+        self._similarity_threshold = fetch_key_value(SIMILARITY_THRESHOLD_FOR_VECTOR_SEARCH, float)
 
         #TODO: in future all  handler, event bus setup,etc should be at a common separate place- maybe in fastapi lifespan
         #setting up handlers and event bus for job event
