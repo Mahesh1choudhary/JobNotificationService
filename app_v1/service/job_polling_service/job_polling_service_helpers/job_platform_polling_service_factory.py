@@ -18,6 +18,6 @@ class JobPlatformPollingServiceFactory:
 
         job_platform_polling_service = cls._platform_registry.get(platform_name, None)
         if job_platform_polling_service is None:
-            logger.warning(f"No job_platform_polling_service for {platform_name}")
+            logger.warning(f"[{cls.__class__.__name__}]-[{cls.get_job_platform_polling_service.__name__}]:No platform_polling_service found for {platform_name}")
             return None
         return job_platform_polling_service()

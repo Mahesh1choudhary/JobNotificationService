@@ -13,6 +13,7 @@ class JobProcessingStatus(str, Enum):
 class Job(BaseModel):
     id: int
     job_company_id: int
+    job_internal_id: int
     job_link: str
     job_description: str | None
     job_description_hash: str

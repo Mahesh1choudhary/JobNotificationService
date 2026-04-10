@@ -1,44 +1,70 @@
 
 
 1-> Cache layer - should be modular. For now will use in-memory
+STATUS - PENDING
 
-2 -> Guardrail limiting per user  -> number of request to user based on his token/limit - DONE
+2 -> Guardrail limiting per user  -> number of request to user based on his token/limit
+STATUS - DONE
 
 3 -> RAG to select most related company name, location ,etc to agent, so that it does not generate something that is not present yet
     Need to discuss more on this.
     -> as per of this, need to ingest new combinations into db also, make sue, nothing is repeated and similar keywords should go into one( like bangalore and bengaluru)
-     -> DONE
+STATUS - DONE
 
-4 -> improve the final message format ( message to user) -> DONE
+4 -> improve the final message format ( message to user)
+STATUS - DONE
 
 5 -> listening on telegram api to get user telegram chat ids and push then to db
+STATUS - PENDING
 
 6 -> doing proper logging
+STATUS - PENDING
 
 7 - adding interests in database
+STATUS - PENDING
 
-8- data ingestion -> STAGE 1 DONE
+8- data ingestion
+STATUS - STAGE 1 COMPLETE ( SOME DATA IS ADDED)
 
-9 - need to add retries on external api calls
+9 - need to add retries on external api calls- also need to add config driven wait time for api calls
+STATUS - PENDING
 
-10 - need to add general concurrency controller at several places -> DONE
+10 - need to add general concurrency controller at several places
+STATUS - STAGE 1 DONE ( BASIC CONTROLELR ADDED)
 
 
 11 -> need to add rate limiting before hitting llm - getting rate limits because of lower tier.
+STATUS - PENDING
 
 12 -> with respect to 11, need to add retries and exponential back-offs
+STATUS - PENDING
 
-13 -> need to generic producer-consumer structure where we are spawning lot of async calls
+13 -> need to add generic producer-consumer structure where we are spawning lot of async calls
+STATUS - PENDING
 
-14 -> need to use single timezone in the project -> TBD
+14 -> need to use single timezone in the project
+STATUS - PENDING
 
-15 -> need to do batching ain all database operations -> TBD
+15 -> need to do batching ain all database operations
+STATUS - PENDING
 
 
 16 -> duplicate rows are coming in jobs table -> job links same, but hash different
+STATUS - DONE
+Solution - removed unique key with description_hash, now checking uniqueness on company_id, job_internal_id
 
 
-17 - need to add scrapper - that removes un-necessary data from the job description -> TBD
+17 - need to add scrapper - that removes un-necessary data from the job description
+STATUS - PENDING
 
 
-18 - need to improve rag -> just vector search is not good enough- add vector+full text search with RRF ( reciprocal rank fusion) - DONE
+18 - need to improve rag -> just vector search is not good enough- add vector+full text search with RRF ( reciprocal rank fusion)
+STATUS - DONE
+
+
+19 -> Integrate the closes match ( vector + full text search) in agent as tool for better accuracy
+STATUS - PENDING
+
+
+20 -> A job can be present in multiple locations, currently we are considering single location only -> need to add support for this
+STATUS - PENDING

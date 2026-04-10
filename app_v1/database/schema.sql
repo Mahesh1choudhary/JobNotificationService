@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS job_notification_targets (
 
     -- This constraint ensures only your Enum values can be inserted
     CONSTRAINT valid_experience_level CHECK (
-    job_experience_level IN ('[0,2)', '[2-4)', '[4-6)', '[6-10)', '10+')
+    job_experience_level IN ('[0,2)', '[2,4)', '[4,6)', '[6,10)', '10+')
     ),
 
     -- Ensures we don't have duplicate targeting rules
@@ -144,6 +144,7 @@ CREATE INDEX idx_job_departments_fts ON job_departments USING GIN (fts_tokens);
 CREATE TABLE jobs (
   id SERIAL PRIMARY KEY,
   job_company_id INTEGER NOT NULL,
+  job_internal_id INTEGER NOT NULL,
   job_link TEXT,
   job_description TEXT NOT NULL,
   job_description_hash TEXT,
@@ -152,7 +153,7 @@ CREATE TABLE jobs (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 
-  UNIQUE(job_company_id, job_link, job_description_hash)
+  UNIQUE(job_company_id, job_internal_id)
 );
 
 ----------------------------------------------------------------------------------
