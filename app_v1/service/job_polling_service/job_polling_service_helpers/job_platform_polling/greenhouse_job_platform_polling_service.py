@@ -1,13 +1,9 @@
 import asyncio
 from datetime import datetime, timezone
 from typing import List
-
 import httpx
-from sqlalchemy import true
-
 from app_v1.commons.service_logger import setup_logger
 from app_v1.database.database_models.company_job_source_model import CompanyJobSourceModel
-from app_v1.database.repository.job_repository import JobRepository
 from app_v1.models.request_models.job_creation_request import JobCreationRequest
 from app_v1.service.job_polling_service.job_polling_service_helpers.job_platform_polling.base_job_platform_polling_service import JobPlatformPollingService
 
@@ -47,13 +43,19 @@ class GreenhouseJobPlatformPollingService(JobPlatformPollingService):
     async def _process_job_data(self, job_data: dict, job_company_id: int) -> JobCreationRequest:
         try:
             company_specific_job_id = job_data.get("internal_job_id", None)
+            # TODO: this is compulsory as of now -> as we define uniqueness of job based on this only in database
+            #TODO: will ignore jobs wihtout internal job id for now
+            if company_specific_job_id is None:
+                return None
+
             job_link = job_data.get("absolute_url", None)
+            job_description = f"job location data : {job_data.get("location", None)};" + f"department data : {job_data.get('departments', None)};"
 
             #TODO: need to do processing on job_content
-            job_description = job_data.get("content")
-            return JobCreationRequest(job_company_id=job_company_id, job_link=job_link, job_description=job_description)
+            job_description = job_description + f"job content data : {job_data.get("content", None)}"
+            return JobCreationRequest(job_company_id=job_company_id, job_internal_id=company_specific_job_id, job_link=job_link, job_description=job_description)
         except Exception as exc:
-            logger.error(f"Error in {self.process_job_data.__name__} for job_data:{job_data}", exc_info=True)
+            logger.error(f"Error in {self._process_job_data.__name__} for job_data:{job_data}", exc_info=True)
             return None
 
 
