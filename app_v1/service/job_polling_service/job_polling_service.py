@@ -29,13 +29,15 @@ class JobPollingService():
 
 
     async def _poll_single_company_for_jobs(self, job_company_job_source:CompanyJobSourceModel):
+        logger.info(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: polling for job_company_source: {job_company_job_source}")
+
         fetch_job_list_url = job_company_job_source.fetch_job_list_url
         if fetch_job_list_url is None:
-            logger.error(f"fetch_job_list_url is empty for company_id: {job_company_job_source.company_id}")
+            logger.warning(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: fetch_job_list_url is empty for company_job_source: {job_company_job_source}")
             return
         job_platform_name = job_company_job_source.platform_name
         if job_platform_name is None:
-            logger.error(f"job_platform_name is empty for company_id: {job_company_job_source.company_id}")
+            logger.warning(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: job_platform_name is empty for company_job_source: {job_company_job_source}")
 
         last_fetched_at:datetime = job_company_job_source.last_fetched_at
         if last_fetched_at is not None:
@@ -45,10 +47,12 @@ class JobPollingService():
             time_after_last_fetched_seconds = (utc_now() - last_fetched_at_utc).total_seconds()
             time_to_wait_seconds = self._next_fetch_gap_seconds - time_after_last_fetched_seconds
             if time_to_wait_seconds > 0:
+                logger.info(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: waiting for {time_to_wait_seconds} seconds before fetching job data for job_company_job_source: {job_company_job_source}")
                 await asyncio.sleep(time_to_wait_seconds)
 
         job_platform_polling_service:JobPlatformPollingService = JobPlatformPollingServiceFactory.get_job_platform_polling_service(job_platform_name)
         if job_platform_polling_service is None:
+            logger.warning(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: No job_platform_polling_service selected for company_job_source: {job_company_job_source}")
             return
 
         # last_fetched_a for in job_company_job_source object will be updated inside the method only
@@ -56,10 +60,12 @@ class JobPollingService():
         await self._companies_job_sources_repository.update_company_job_source_last_fetched_at(job_company_job_source)
 
         await self.ingest_and_process_jobs(job_creation_requests)
+        logger.info(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: polled for job_company_source: {job_company_job_source}")
 
 
     async def ingest_and_process_jobs(self, job_creation_requests: List[JobCreationRequest]) -> None:
         try:
+            logger.info(f"[{self.__class__.__name__}]-[{self.ingest_and_process_jobs.__name__}]: ingesting and processing {len(job_creation_requests)} jobs")
             # adding new jobs as pending
             await self._job_repository.insert_jobs_ignore_duplicates(job_creation_requests)
 
@@ -75,25 +81,26 @@ class JobPollingService():
             skipped_job_ids = []
             for job, result in zip(all_pending_jobs, results):
                 if isinstance(result, Exception):
-                    logger.error(f"Job {job.id} failed: {result}", exc_info=True)
+                    logger.error(f"[{self.__class__.__name__}]-[{self.ingest_and_process_jobs.__name__}]: Job {job.id} failed: {result}", exc_info=True)
                 elif result == JobProcessingStatus.PROCESSED:
                     processed_job_ids.append(job.id)
                 elif result == JobProcessingStatus.SKIPPED:
                     skipped_job_ids.append(job.id)
-
             await self._job_repository.update_job_processing_status_by_id(processed_job_ids, JobProcessingStatus.PROCESSED)
             await self._job_repository.update_job_processing_status_by_id(skipped_job_ids, JobProcessingStatus.SKIPPED)
+            logger.info(f"""[{self.__class__.__name__}]-[{self.ingest_and_process_jobs.__name__}]: Out of {len(all_pending_jobs)} pending jobs; {len(processed_job_ids)} jobs processed, {len(skipped_job_ids)} jobs skipped and "
+                        remaining {len(all_pending_jobs) - len(processed_job_ids) - len(skipped_job_ids)} thrown errors""")
 
         except Exception as exc:
-            logger.error(f"Error in {self.ingest_and_process_jobs.__name__}", exc_info=True)
+            logger.error(f"[{self.__class__.__name__}]-[{self.ingest_and_process_jobs.__name__}]: Error ", exc_info=True)
 
     async def start_polling(self):
-        logger.info(f"Starting the polling")
+        logger.info(f"[{self.__class__.__name__}]-[{self.start_polling.__name__}]: Starting the polling")
         while True:
             try:
                 total_entries = await self._companies_job_sources_repository.get_total_entries_count()
                 if total_entries == 0:
-                    logger.warning("no entries to poll on")
+                    logger.warning(f"[{self.__class__.__name__}]-[{self.start_polling.__name__}]: no entries to poll for")
 
                 batch_size = 5 #TODO: should be config driven
                 for offset in range(0, total_entries, batch_size):
@@ -105,9 +112,11 @@ class JobPollingService():
                     tasks = [self._poll_single_company_for_jobs(company_job_source_data) for company_job_source_data in batch_job_sources]
                     await asyncio.gather(*tasks, return_exceptions=True)
 
+                logger.info(f"[{self.__class__.__name__}]-[{self.start_polling.__name__}]: completed polling for current cycle for {total_entries} companies")
+
                 #TODO: cannot delete jobs as the next fetch will bring them again and will udpate in database- need to think of solution
                 #cutoff_timestamp: datetime = utc_now() - self._job_retention_period
                 #await self._job_repository.remove_old_jobs(cutoff_timestamp) # deleting jobs that came before cutoff_timestamp
             except Exception as exc:
-                logger.error(f"Exception occurred in start_polling: {exc}")
+                logger.error(f"[{self.__class__.__name__}]-[{self.start_polling.__name__}]: Exception occurred: {exc}")
 

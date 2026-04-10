@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Sequence, List
 
 from app_v1.commons.hash_function import compute_hash
@@ -11,29 +11,30 @@ from app_v1.models.request_models.job_creation_request import JobCreationRequest
 
 logger = setup_logger()
 
-
 class JobRepository:
     def __init__(self, database_client: BaseDatabaseClient):
         self._database_client = database_client
 
     async def insert_jobs_ignore_duplicates(self, rows: Sequence[JobCreationRequest]) -> None:
         """Insert rows; duplicates (same company, job_link, description_hash) are skipped."""
-        if not rows:
-            return []
-        now = utc_now()
-        args_list = []
-        for r in rows:
-            job_description = r.job_description
-            job_description_hash = compute_hash(job_description)
-            args_list.append((r.job_company_id, r.job_link, job_description, job_description_hash, now, JobProcessingStatus.PENDING.value))
 
         query = f"""
-            INSERT INTO {DatabaseTables.JOB_TABLE.value} (job_company_id, job_link, job_description, job_description_hash, created_at, job_processing_status)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            ON CONFLICT (job_company_id, job_link, job_description_hash) DO NOTHING
-            RETURNING id, job_company_id, job_link, job_description, job_description_hash, created_at, job_processing_status
+            INSERT INTO {DatabaseTables.JOB_TABLE.value} (job_company_id, job_internal_id, job_link, job_description, job_description_hash, created_at, job_processing_status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            ON CONFLICT (job_company_id, job_internal_id) DO NOTHING
+            RETURNING id, job_company_id, job_internal_id, job_link, job_description, job_description_hash, created_at, job_processing_status
         """
         try:
+            if not rows:
+                return []
+            #TODO: need to check the time here
+            now = utc_now()
+            args_list = []
+            for r in rows:
+                job_description = r.job_description
+                job_description_hash = compute_hash(job_description)
+                args_list.append((r.job_company_id, r.job_internal_id, r.job_link, job_description, job_description_hash, now, JobProcessingStatus.PENDING.value))
+
             await self._database_client.executemany(query, args_list)
         except Exception:
             logger.error("Database error in insert_jobs_ignore_duplicates", exc_info=True)
@@ -41,7 +42,7 @@ class JobRepository:
 
     async def get_jobs_by_job_processing_status(self, job_processing_status: JobProcessingStatus, cutoff_timestamp:datetime, limit: int = 20, offset: int = 0) -> list[Job]:
         query = f"""
-            SELECT id, job_company_id, job_link, job_description, job_description_hash, created_at, job_processing_status
+            SELECT id, job_company_id, job_internal_id, job_link, job_description, job_description_hash, created_at, job_processing_status
             FROM {DatabaseTables.JOB_TABLE.value}
             WHERE job_processing_status = $1 AND created_at > $2
             ORDER BY created_at DESC, id ASC
