@@ -24,9 +24,9 @@ class JobType(str, Enum):
 
 class ExperienceLevel(str, Enum):
     ENTRY =  "[0,2)"
-    JUNIOR = "[2-4)"
-    MID = "[4-6)"
-    SENIOR = "[6-10)"
+    JUNIOR = "[2,4)"
+    MID = "[4,6)"
+    SENIOR = "[6,10)"
     EXPERT = "10+"
 
 

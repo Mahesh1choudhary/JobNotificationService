@@ -14,5 +14,5 @@ class BaseNamespace(ABC, Generic[T]):
         pass
 
     @abstractmethod
-    async def get_closest_matches(self, item: str) -> T:
+    async def get_closest_matches(self, item: str, similarity_threshold: float,limit:int = 5) -> T:
         pass

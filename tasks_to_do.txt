@@ -2,13 +2,14 @@
 
 1-> Cache layer - should be modular. For now will use in-memory
 
-2 -> Guardrail limiting per user  -> number of request to user based on his token/limit
+2 -> Guardrail limiting per user  -> number of request to user based on his token/limit - DONE
 
 3 -> RAG to select most related company name, location ,etc to agent, so that it does not generate something that is not present yet
     Need to discuss more on this.
     -> as per of this, need to ingest new combinations into db also, make sue, nothing is repeated and similar keywords should go into one( like bangalore and bengaluru)
+     -> DONE
 
-4 -> improve the final message format ( message to user)
+4 -> improve the final message format ( message to user) -> DONE
 
 5 -> listening on telegram api to get user telegram chat ids and push then to db
 
@@ -16,8 +17,29 @@
 
 7 - adding interests in database
 
-8- data ingestion
+8- data ingestion -> STAGE 1 DONE
 
 9 - need to add retries on external api calls
 
-10 - need to add concurrency controller at several places
+10 - need to add general concurrency controller at several places -> DONE
+
+
+11 -> need to add rate limiting before hitting llm - getting rate limits because of lower tier.
+
+12 -> with respect to 11, need to add retries and exponential back-offs
+
+13 -> need to generic producer-consumer structure where we are spawning lot of async calls
+
+14 -> need to use single timezone in the project
+
+15 -> need to do batching ain all database operations
+
+
+16 -> duplicate rows are coming in jobs table -> job links same, but hash different
+
+
+17 - need to add scrapper - that removes un-necessary data from the job description
+
+
+
+18 - need to improve rag -> just vector search is not good enough

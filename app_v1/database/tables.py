@@ -11,3 +11,4 @@ class DatabaseTables(Enum):
     USER_QUOTA_TABLE = 'user_quota'
     JOB_COMPANY_NAME_TABLE = 'job_company_names'
     JOB_LOCATION_TABLE = 'job_locations'
+    JOB_DEPARTMENT_NAME_TABLE = 'job_departments'

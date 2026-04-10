@@ -1,10 +1,13 @@
 from typing import List
 
 from app_v1.database.database_client import BaseDatabaseClient
+from app_v1.database.database_config import DatabaseConfigFactory
+from app_v1.database.database_manager import DatabaseManager
 from app_v1.database.repository.vector_repository import BaseVectorRepository
 from app_v1.database.tables import DatabaseTables
 from app_v1.llm.llm_manager import LLMManager
 from app_v1.llm.llm_model.embedding_model import EmbeddingModel
+from app_v1.llm.llm_model.gpt4o_mini_llm_model import GPT4OMiniLLMModel
 from app_v1.vector_data.base_namespace import BaseNamespace
 from app_v1.vector_data.vector_data_models.job_location_vector import JobLocationVector
 
@@ -31,11 +34,11 @@ class JobLocationNamespace(BaseNamespace[JobLocationVector]):
         data_to_insert["embedding"] = embeddings
         await self._job_location_vector_repository.insert_record(data_to_insert)
 
-    async def get_closest_matches(self, item: str, limit:int = 5) -> List[JobLocationVector]:
+    async def get_closest_matches(self, item: str, similarity_threshold: float, limit:int = 5) -> List[JobLocationVector]:
         embedding_model:EmbeddingModel = llm_manager.get_embedding_model()
         embeddings = await embedding_model.get_embeddings(item)
 
         columns_to_extract = list(JobLocationVector.model_fields.keys())
         closest_matches = await self._job_location_vector_repository.vector_search(embeddings, limit, columns_to_extract)
 
-        return [JobLocationVector(**match) for match in closest_matches]
+        return [JobLocationVector(**match) for match in closest_matches if match["similarity_score"] >= similarity_threshold]

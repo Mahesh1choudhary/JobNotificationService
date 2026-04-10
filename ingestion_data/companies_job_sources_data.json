@@ -1,0 +1,12 @@
+[
+  {
+    "company_name": "rubrik",
+    "platform_name": "greenhouse",
+    "fetch_job_list_url":"https://boards-api.greenhouse.io/v1/boards/rubrik/jobs?content=true"
+  },
+  {
+    "company_name": "databricks",
+    "platform_name": "greenhouse",
+    "fetch_job_list_url":"https://boards-api.greenhouse.io/v1/boards/databricks/jobs?content=true"
+  }
+]

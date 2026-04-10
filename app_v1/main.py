@@ -2,7 +2,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 import uvicorn
+import asyncio
 
+from app_v1.commons.service_logger import setup_logger
 from app_v1.database.database_config import DatabaseConfigFactory
 from app_v1.database.database_manager import DatabaseManager
 from app_v1.llm.llm_manager import LLMManager
@@ -11,8 +13,10 @@ from app_v1.llm.llm_model.gpt4o_mini_llm_model import GPT4OMiniLLMModel
 from app_v1.controller.user_controller import user_router
 from app_v1.controller.user_preference_controller import user_preference_router
 from app_v1.controller.ingestion_controller import ingestion_router
+from app_v1.service.job_polling_service.job_polling_service import JobPollingService
 
 
+logger = setup_logger()
 @asynccontextmanager
 async def lifespan(app:FastAPI):
     # setting llm manager and creating database instance
@@ -26,8 +30,16 @@ async def lifespan(app:FastAPI):
 
     app.state.database_manager = database_manager #will be used in dependency injections
 
+    job_polling_service = JobPollingService(database_manager.database_client)
+    polling_task = asyncio.create_task(job_polling_service.start_polling())
+
     yield
 
+    polling_task.cancel()
+    try:
+        await polling_task
+    except asyncio.CancelledError:
+        logger.info("Polling task stopped successfully")
     await database_manager.close()
 
 

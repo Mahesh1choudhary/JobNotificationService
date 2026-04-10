@@ -1,0 +1,21 @@
+{
+  "namespace_type": "job_department_name_namespace",
+  "data":[
+    {
+      "department_name": "engineering",
+      "description": "engineering and technology, software development, infrastructure, research and development"
+    },
+    {
+      "department_name": "human resources",
+      "description": "people operations, talent acquisition, recruiting, people and culture"
+    },
+    {
+      "department_name": "finance and accounting",
+      "description": "financial planning and analysis, finops"
+    },
+    {
+      "department_name": "customer success and support",
+      "description": "customer experience"
+    }
+  ]
+}

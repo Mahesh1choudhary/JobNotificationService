@@ -2,6 +2,7 @@ from typing import List
 
 from openai import AsyncOpenAI
 
+from app_v1.commons.concurrency_controller import AsyncConcurrencyController
 from app_v1.commons.service_logger import setup_logger
 from app_v1.config.config_keys import OPENAI_API_KEY
 from app_v1.config.config_loader import fetch_key_value
@@ -11,6 +12,12 @@ class EmbeddingModel():
 
     def __init__(self):
         self.embedding_model_name: str = "text-embedding-3-small"
+
+        self._max_concurrent_calls = 2 #TODO: should be config driven
+        #TODO: need to reconsider using concurrency controller here
+        self._concurrency_controller = AsyncConcurrencyController(self._max_concurrent_calls)
+        self.get_embeddings = self._concurrency_controller.limit_concurrency(self.get_embeddings) # wrapped in concurrency controller
+
         try:
             open_api_key = fetch_key_value(OPENAI_API_KEY, str)
             if not open_api_key:

@@ -46,9 +46,13 @@ class BaseVectorRepository():
 
     async def vector_search(self, embedding: List[float], limit, columns_to_extract:List[str]):
         embedding_column_name = "embedding" #TODO: should be like this, one thing changed, everything will breakdown
-        cols_string = ", ".join(columns_to_extract)
+
+        score_alias = f"(1 - ({embedding_column_name} <=> $1::vector)) AS similarity_score" # higher value means more similar or matching
+        cols_string = ", ".join(columns_to_extract + [score_alias])
         query = f"""
-            SELECT {cols_string} FROM {self._table_name} ORDER BY {embedding_column_name} <=> $1::vector LIMIT $2
+            SELECT {cols_string} FROM {self._table_name} 
+            ORDER BY {embedding_column_name} <=> $1::vector 
+            LIMIT $2
         """
         #TODO: cosine search for now, if changed, update index in schema.sql and other places accordingly
         #TODO: update the embedding model, tables , etc accordingly with any change
