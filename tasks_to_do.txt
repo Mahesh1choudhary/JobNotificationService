@@ -41,5 +41,4 @@
 17 - need to add scrapper - that removes un-necessary data from the job description
 
 
-
-18 - need to improve rag -> just vector search is not good enough
+18 - need to improve rag -> just vector search is not good enough- add vector+full text search with RRF ( reciprocal rank fusion) - DONE

@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Dict
 from app_v1.database.database_client import BaseDatabaseClient
 from app_v1.database.repository.vector_repository import BaseVectorRepository
 from app_v1.database.tables import DatabaseTables
@@ -32,14 +32,36 @@ class JobCompanyNameNamespace(BaseNamespace[JobCompanyNameVector]):
         await self._job_company_name_vector_repository.insert_record(data_to_insert)
 
 
-    async def get_closest_matches(self, item: str, similarity_threshold: float,limit:int = 5) -> List[JobCompanyNameVector]:
+    async def get_closest_matches(self, item: str, similarity_threshold: float,limit:int = 5, ranking_constant:int = 60) -> List[JobCompanyNameVector]:
         embedding_model:EmbeddingModel = llm_manager.get_embedding_model()
         embeddings = await embedding_model.get_embeddings(item)
 
         column_to_extract = list(JobCompanyNameVector.model_fields.keys())
-        closest_matches = await self._job_company_name_vector_repository.vector_search(embeddings, limit, column_to_extract)
 
-        return [JobCompanyNameVector(**match) for match in closest_matches if match["similarity_score"] >= similarity_threshold]
+        # limit+20, so that there are enough data for ranking
+        vector_search_closest_matches = await self._job_company_name_vector_repository.vector_search(embeddings, limit+20, column_to_extract)
+
+        full_text_search_closest_matches = await self._job_company_name_vector_repository.full_text_search(item, limit+20, column_to_extract)
+
+        final_scores:Dict[str, float] = {} # {company_name: score}
+        data_objects: Dict[str, JobCompanyNameVector] = {}
+        for rank, match in enumerate(vector_search_closest_matches, start=1):
+            data: JobCompanyNameVector = JobCompanyNameVector(**match)
+            data_objects[data.company_name] = data
+            final_scores[data.company_name] = final_scores.get(data.company_name, 0) + (1/(ranking_constant + rank))
+
+        for rank, match in enumerate(full_text_search_closest_matches, start=1):
+            data: JobCompanyNameVector = JobCompanyNameVector(**match)
+            data_objects[data.company_name] = data
+            final_scores[data.company_name] = final_scores.get(data.company_name, 0) + (1/(ranking_constant + rank))
+
+        sorted_scores = sorted(final_scores.items(), key=lambda item: item[1], reverse=True)
+
+        final_results: List[JobCompanyNameVector] = []
+        for item, score in sorted_scores[:limit]:
+            final_results.append(data_objects[item])
+
+        return final_results
 
 
 
