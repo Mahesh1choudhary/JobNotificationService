@@ -1,14 +1,10 @@
 import asyncio
-import time
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from typing import List
 
 from app_v1.commons.service_logger import setup_logger
 from app_v1.commons.time_utils import get_as_utc, utc_now
-from app_v1.database import database_client
 from app_v1.database.database_client import BaseDatabaseClient
-from app_v1.database.database_config import DatabaseConfigFactory
-from app_v1.database.database_manager import DatabaseManager
 from app_v1.database.database_models.company_job_source_model import CompanyJobSourceModel
 from app_v1.database.database_models.job_model import Job, JobProcessingStatus
 from app_v1.database.repository.companies_job_sources_repository import CompaniesJobSourcesRepository
