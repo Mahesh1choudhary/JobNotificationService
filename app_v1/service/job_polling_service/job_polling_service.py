@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import List
 
 from app_v1.commons.service_logger import setup_logger
-from app_v1.commons.time_utils import get_as_utc, utc_now
+from app_v1.commons.time_utils import current_time_in_utc
 from app_v1.config.config_keys import SAME_COMPANY_POLLING_GAP_IN_SECONDS, JOB_RETENTION_PERIOD_IN_DAYS, \
     COMPANY_BATCH_SIZE_FOR_POLLING
 from app_v1.config.config_loader import fetch_key_value
@@ -46,10 +46,8 @@ class JobPollingService():
 
         last_fetched_at:datetime = job_company_job_source.last_fetched_at
         if last_fetched_at is not None:
-            #TODO: check time zone here, last fetched at should also be in same time zone
-            #TODO: currently limited is same for all, in future should be different fro each platform if needed
-            last_fetched_at_utc = get_as_utc(last_fetched_at)
-            time_after_last_fetched_seconds = (utc_now() - last_fetched_at_utc).total_seconds()
+            #TODO: currently limiting is same for all, in future should be different for each platform if needed
+            time_after_last_fetched_seconds = (current_time_in_utc() - last_fetched_at).total_seconds()
             time_to_wait_seconds = self._next_fetch_gap_seconds - time_after_last_fetched_seconds
             if time_to_wait_seconds > 0:
                 logger.info(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: waiting for {time_to_wait_seconds} seconds before fetching job data for job_company_job_source: {job_company_job_source}")
@@ -77,7 +75,7 @@ class JobPollingService():
             #fetching and processing any pending jobs
             #TODO: should fetch in batches - not all at once
             # fetching pending jobs that came after cut_off_timestamp
-            cutoff_timestamp: datetime = utc_now() - self._job_retention_period
+            cutoff_timestamp: datetime = current_time_in_utc() - self._job_retention_period
             all_pending_jobs: List[Job] = await self._job_repository.get_jobs_by_job_processing_status(JobProcessingStatus.PENDING, cutoff_timestamp, 5000,0)
             tasks = [self._job_notification_service.generate_tags_and_send_notifications(job) for job in all_pending_jobs]
             results = await asyncio.gather(*tasks, return_exceptions=True)
