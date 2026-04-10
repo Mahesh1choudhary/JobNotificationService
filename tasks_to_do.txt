@@ -30,15 +30,15 @@
 
 13 -> need to generic producer-consumer structure where we are spawning lot of async calls
 
-14 -> need to use single timezone in the project
+14 -> need to use single timezone in the project -> TBD
 
-15 -> need to do batching ain all database operations
+15 -> need to do batching ain all database operations -> TBD
 
 
 16 -> duplicate rows are coming in jobs table -> job links same, but hash different
 
 
-17 - need to add scrapper - that removes un-necessary data from the job description
+17 - need to add scrapper - that removes un-necessary data from the job description -> TBD
 
 
 18 - need to improve rag -> just vector search is not good enough- add vector+full text search with RRF ( reciprocal rank fusion) - DONE

@@ -32,6 +32,7 @@ class IngestionService():
         #TODO: need to convert into lower cases
         ingestion_data = ingestion_request.data
         for single_ingestion in ingestion_data:
+            print(single_ingestion)
             await namespace_instance.ingest_embedding_data(single_ingestion)
 
 
