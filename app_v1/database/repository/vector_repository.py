@@ -44,7 +44,7 @@ class BaseVectorRepository():
 
 
 
-    async def vector_search(self, embedding: List[float], limit, columns_to_extract:List[str]):
+    async def vector_search(self, embedding: List[float], limit:int, columns_to_extract:List[str]):
         embedding_column_name = "embedding" #TODO: should be like this, one thing changed, everything will breakdown
 
         score_alias = f"(1 - ({embedding_column_name} <=> $1::vector)) AS similarity_score" # higher value means more similar or matching
@@ -64,4 +64,21 @@ class BaseVectorRepository():
             logger.error(f"Database Error in vector_search", exc_info=True)
             raise
 
+    async def full_text_search(self, item_text:str, limit:int , columns_to_extract:List[str] ):
+        cols_string = ", ".join(columns_to_extract)
+        query = f"""
+            SELECT {cols_string}, ts_rank(fts_tokens, plainto_tsquery('english', $1)) as fts_rank
+            FROM {self._table_name} 
+            WHERE fts_tokens @@ plainto_tsquery('english', $1)
+            ORDER BY fts_rank DESC
+            LIMIT $2 
+        """
 
+        try:
+            if not item_text.strip():
+                return []
+            rows = await self._database_client.fetch(query, item_text, limit)
+            return rows
+        except Exception:
+            logger.error(f"Database Error in {self.full_text_search.__name__}", exc_info=True)
+            raise

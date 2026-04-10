@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from app_v1.database.database_client import BaseDatabaseClient
 from app_v1.database.database_config import DatabaseConfigFactory
@@ -34,11 +34,60 @@ class JobLocationNamespace(BaseNamespace[JobLocationVector]):
         data_to_insert["embedding"] = embeddings
         await self._job_location_vector_repository.insert_record(data_to_insert)
 
-    async def get_closest_matches(self, item: str, similarity_threshold: float, limit:int = 5) -> List[JobLocationVector]:
+    async def get_closest_matches(self, item: str, similarity_threshold: float,limit:int = 5, ranking_constant:int = 60) -> List[JobLocationVector]:
+        #TODO: this can give wrong results as it tries to find best match, so completely different words can be best match if no other match is present
         embedding_model:EmbeddingModel = llm_manager.get_embedding_model()
         embeddings = await embedding_model.get_embeddings(item)
 
-        columns_to_extract = list(JobLocationVector.model_fields.keys())
-        closest_matches = await self._job_location_vector_repository.vector_search(embeddings, limit, columns_to_extract)
+        column_to_extract = list(JobLocationVector.model_fields.keys())
 
-        return [JobLocationVector(**match) for match in closest_matches if match["similarity_score"] >= similarity_threshold]
+        # limit+20, so that there are enough data for ranking
+        vector_search_closest_matches = await self._job_location_vector_repository.vector_search(embeddings, limit+20, column_to_extract)
+
+        full_text_search_closest_matches = await self._job_location_vector_repository.full_text_search(item, limit+20, column_to_extract)
+
+        #TODO: currently doing based on threshold, in future, will integrate in agent as tool call only
+        final_scores:Dict[str, float] = {} # {job_location: score}
+        data_objects: Dict[str, JobLocationVector] = {}
+        for rank, match in enumerate(vector_search_closest_matches, start=1):
+            if match["similarity_score"] < similarity_threshold:
+                break
+            data: JobLocationVector = JobLocationVector(**match)
+            data_objects[data.job_location] = data
+            final_scores[data.job_location] = final_scores.get(data.job_location, 0) + (1/(ranking_constant + rank))
+
+        for rank, match in enumerate(full_text_search_closest_matches, start=1):
+            data: JobLocationVector = JobLocationVector(**match)
+            data_objects[data.job_location] = data
+            final_scores[data.job_location] = final_scores.get(data.job_location, 0) + (1/(ranking_constant + rank))
+
+        sorted_scores = sorted(final_scores.items(), key=lambda item: item[1], reverse=True)
+
+        final_results: List[JobLocationVector] = []
+        for item, score in sorted_scores[:limit]:
+            final_results.append(data_objects[item])
+
+        return final_results
+
+
+
+
+async def main():
+    llm_manager = LLMManager()
+    llm_manager.set_tag_generation_model(GPT4OMiniLLMModel())
+    llm_manager.set_embedding_model(EmbeddingModel())
+
+    database_config = DatabaseConfigFactory.create_database_config()
+    database_manager = DatabaseManager(database_config)
+    await database_manager.init()
+
+    job_location_namespace = JobLocationNamespace(database_manager.database_client)
+
+    locations = ["bangalore"]
+    for l in locations:
+        await job_location_namespace.get_closest_matches(l,1)
+
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())

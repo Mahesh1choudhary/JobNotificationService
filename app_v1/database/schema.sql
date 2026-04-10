@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS job_platforms (
     platform_name TEXT NOT NULL UNIQUE
 );
 
-
+----------------------------------------------------------------------------------
 
 ---1 companies table
 CREATE TABLE IF NOT EXISTS companies_job_sources (
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS companies_job_sources (
 );
 --- by default index on company_id and company_name
 
-
+----------------------------------------------------------------------------------
 
 ---2 users table
 CREATE TABLE IF NOT EXISTS users (
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 --- by default index on user_id, user_name, user_telegram_user_name and email
 
-
+----------------------------------------------------------------------------------
 
 ---3 job notification target table
 CREATE TABLE IF NOT EXISTS job_notification_targets (
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS job_notification_targets (
 );
 
 
-
+----------------------------------------------------------------------------------
 
 
 ---4 user quota table
@@ -68,20 +68,34 @@ CREATE TABLE IF NOT EXISTS user_quota (
 --- by default index on user_id
 
 
+----------------------------------------------------------------------------------
+
+
 -- enabling vector extension
 CREATE EXTENSION IF NOT EXISTS vector;
 
+----------------------------------------------------------------------------------
 
 --- Job company names vector table
 CREATE TABLE IF NOT EXISTS job_company_names (
     id SERIAL PRIMARY KEY,
     company_name TEXT NOT NULL UNIQUE,
     description TEXT,
-    embedding vector(1536)
+    embedding vector(1536),
+
+    fts_tokens tsvector GENERATED ALWAYS AS (
+    to_tsvector('english', company_name || ' ' || coalesce(description, ''))
+    ) STORED
 );
 CREATE INDEX ON job_company_names
 USING hnsw(embedding vector_cosine_ops);
 --- TODO: need to check other embeddings -> also currently using cosine rule, so when updated, update everwhere
+
+-- full text search index( GIN)
+CREATE INDEX idx_job_company_names_fts ON job_company_names USING GIN (fts_tokens);
+
+
+----------------------------------------------------------------------------------
 
 
 --- Job locations vector table
@@ -89,12 +103,21 @@ CREATE TABLE IF NOT EXISTS job_locations (
     id SERIAL PRIMARY KEY,
     job_location TEXT NOT NULL UNIQUE,
     description TEXT,
-    embedding vector(1536)
+    embedding vector(1536),
+
+    fts_tokens tsvector GENERATED ALWAYS AS (
+        to_tsvector('english', job_location || ' ' || coalesce(description, ''))
+        ) STORED
 );
-CREATE INDEX ON job_locations
-USING hnsw (embedding vector_cosine_ops);
+-- vector index
+CREATE INDEX ON job_locations USING hnsw (embedding vector_cosine_ops);
+
+-- full text search index( GIN)
+CREATE INDEX idx_job_locations_fts ON job_locations USING GIN (fts_tokens);
 
 
+
+----------------------------------------------------------------------------------
 
 
 --- Job department vector table
@@ -102,13 +125,20 @@ CREATE TABLE IF NOT EXISTS job_departments (
    id SERIAL PRIMARY KEY,
    department_name TEXT NOT NULL UNIQUE,
    description TEXT,
-   embedding vector(1536)
+   embedding vector(1536),
+
+   fts_tokens tsvector GENERATED ALWAYS AS (
+       to_tsvector('english', department_name || ' ' || coalesce(description, ''))
+       ) STORED
 );
 CREATE INDEX ON job_departments
 USING hnsw (embedding vector_cosine_ops);
 
+-- full text search index( GIN)
+CREATE INDEX idx_job_departments_fts ON job_departments USING GIN (fts_tokens);
 
 
+----------------------------------------------------------------------------------
 
 --- Jobs table
 CREATE TABLE jobs (
@@ -125,4 +155,4 @@ CREATE TABLE jobs (
   UNIQUE(job_company_id, job_link, job_description_hash)
 );
 
-
+----------------------------------------------------------------------------------
