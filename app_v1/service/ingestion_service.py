@@ -35,7 +35,14 @@ class IngestionService():
             print(single_ingestion)
             await namespace_instance.ingest_embedding_data(single_ingestion)
 
+    async def ingest_embedding_data_batch(self, ingestion_request: IngestionRequest):
+        namespace_instance = self._namespace_mapping[ingestion_request.namespace_type]
+        if not namespace_instance:
+            raise ValueError(f"Namespace {ingestion_request.namespace_type} not supported; available ones : {",".join(self._namespace_mapping.keys())}")
+        ingestion_data = ingestion_request.data
+        await namespace_instance.ingest_embedding_data_batch(ingestion_data)
 
+    #TODO: Create a batch based ingestion
     async def ingest_new_companies_job_sources(self, ingestion_request: List[CompanyJobSourceIngestionRequest]):
         try:
             tasks = [self._companies_job_sources_repository.insert_new_company_job_source(CompanyJobSourceModel(**company_job_source_request.model_dump()))

@@ -17,7 +17,8 @@ async def ingest_embedding_data(ingestion_request: Annotated[IngestionRequest, B
                                ingestion_service: IngestionService = Depends(get_ingestion_service)):
     try:
         # for ingesting company_names and locations data only
-        await ingestion_service.ingest_embedding_data(ingestion_request)
+        await ingestion_service.ingest_embedding_data_batch(ingestion_request)
+        # await ingestion_service.ingest_embedding_data(ingestion_request)
     except Exception as e:
         #TODO: proper error handling
         logger.error(f"Error in data ingestion", exc_info=True)

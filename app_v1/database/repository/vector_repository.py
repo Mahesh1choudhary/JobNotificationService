@@ -43,7 +43,6 @@ class BaseVectorRepository():
 
 
 
-
     async def vector_search(self, embedding: List[float], limit:int, columns_to_extract:List[str]):
         embedding_column_name = "embedding" #TODO: should be like this, one thing changed, everything will breakdown
 
@@ -82,3 +81,51 @@ class BaseVectorRepository():
         except Exception:
             logger.error(f"Database Error in {self.full_text_search.__name__}", exc_info=True)
             raise
+
+
+    async def insert_records(self, data_list: list[dict]):
+        if not data_list:
+            return
+
+        # Use first row to determine columns
+        columns = list(data_list[0].keys())
+        column_str = ", ".join(columns)
+
+        all_placeholders = []
+        all_values = []
+
+        param_index = 1
+
+        for row in data_list:
+            row_placeholders = []
+
+            for col in columns:
+                value = row[col]
+
+                p = f"${param_index}"
+
+                if col == "embedding":
+                    p = f"{p}::vector"
+                    all_values.append(str(value))
+                else:
+                    all_values.append(value)
+
+                row_placeholders.append(p)
+                param_index += 1
+
+            all_placeholders.append(f"({', '.join(row_placeholders)})")
+
+        values_clause = ", ".join(all_placeholders)
+
+        query = f"""
+            INSERT INTO {self._table_name} ({column_str})
+            VALUES {values_clause}
+            ON CONFLICT DO NOTHING
+        """
+
+        try:
+            await self._database_client.executemany(query, *all_values)
+        except Exception:
+            logger.error("Database Error in insert_records", exc_info=True)
+            raise
+
