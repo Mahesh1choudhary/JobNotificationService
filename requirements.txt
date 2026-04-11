@@ -7,3 +7,4 @@ autogen-agentchat==0.5.7
 tenacity==9.0.0
 requests==2.31.0
 sqlalchemy==2.0.48
+asyncpg==0.31.0
