@@ -13,6 +13,16 @@ def fetch_key_value(key:Union[str,Enum], value_model: Type[T]) -> T:
     if isinstance(key, Enum):
         key= key.value
 
+    # first checking for environment
+    env_value = os.getenv(key)
+    if env_value:
+        try:
+            # If the model expects a dict (like a DB config), parse the JSON string
+            return value_model(**json.loads(env_value))
+        except (json.JSONDecodeError, TypeError):
+            # Otherwise, treat it as a raw value (string/int)
+            return value_model(env_value)
+
     env_type = os.getenv(EnvironmentConfigClass.ENV.value, "local")
 
     #TODO: update for deployment and should be single time - so store in cache
