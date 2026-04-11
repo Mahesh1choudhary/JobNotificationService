@@ -16,7 +16,7 @@ def fetch_key_value(key:Union[str,Enum], value_model: Type[T]) -> T:
     env_type = os.getenv(EnvironmentConfigClass.ENV.value, "local")
     logger.info(f"env_type : {env_type}")
 
-    if env_type == "local":
+    if env_type == "prod":
         # this is render specific
         config_data_file_path = "/etc/secrets/config_data.json"
     else:
