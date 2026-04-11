@@ -14,11 +14,17 @@ def fetch_key_value(key:Union[str,Enum], value_model: Type[T]) -> T:
         key= key.value
 
     env_type = os.getenv(EnvironmentConfigClass.ENV.value, "local")
+    logger.info(f"env_type : {env_type}")
 
-    #TODO: update for deployment and should be single time - so store in cache
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-    config_data_file_path = os.path.join(PROJECT_ROOT,f"app_v1/config/config_data.json")
+    if env_type == "local":
+        # this is render specific
+        config_data_file_path = "/etc/secrets/config_data.json"
+    else:
+        #TODO: update for deployment and should be single time - so store in cache
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+        config_data_file_path = os.path.join(PROJECT_ROOT,f"app_v1/config/config_data.json")
+
     if not os.path.exists(config_data_file_path):
         logger.error(f"{config_data_file_path} does not exist", exc_info=True)
         raise ValueError(f"config file for ENV:'{env_type}' not found at {config_data_file_path}.")
