@@ -3,6 +3,7 @@ from enum import Enum
 
 from pydantic import BaseModel
 
+from app_v1.database.database_models.company_job_source_model import FetchConfig
 from app_v1.vector_data.job_company_name_namespace import JobCompanyNameNamespace
 from app_v1.vector_data.job_department_name_namespace import JobDepartmentNameNamespace
 from app_v1.vector_data.job_location_namespace import JobLocationNamespace
@@ -25,4 +26,4 @@ class IngestionRequest(BaseModel):
 class CompanyJobSourceIngestionRequest(BaseModel):
     company_name: str
     platform_name: str
-    fetch_job_list_url: str
+    fetch_config: FetchConfig

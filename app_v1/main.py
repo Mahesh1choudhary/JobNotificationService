@@ -57,6 +57,16 @@ def print_routes(app: FastAPI) -> None:
         print(f"Path: {getattr(route, 'path')}, Methods: {getattr(route, 'methods')}")
 
 app = create_app()
+
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "version": "1.0.0"
+    }
+
+
 print_routes(app)
 
 if __name__ == "__main__":

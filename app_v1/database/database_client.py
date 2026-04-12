@@ -1,4 +1,5 @@
 import asyncio
+import json
 import threading
 from abc import ABC, abstractmethod
 from contextlib import asynccontextmanager
@@ -56,6 +57,16 @@ class PostgresSQLDatabaseClient(BaseDatabaseClient):
         self._initialized = False
         self.async_lock = asyncio.Lock()
 
+    @staticmethod
+    async def setup_connection(conn):
+        """This runs for every new connection in the pool, to avoid manual converting of jsons to dict or reverse"""
+        await conn.set_type_codec(
+            'jsonb',
+            encoder=json.dumps,
+            decoder=json.loads,
+            schema='pg_catalog'
+        )
+
 
     async def init(self):
         if self._initialized:
@@ -73,7 +84,8 @@ class PostgresSQLDatabaseClient(BaseDatabaseClient):
                     port= self._database_config.postgresSQL_db_port,
                     ssl="require",
                     min_size= self._database_config.postgresSQL_db_connection_pool_min,
-                    max_size= self._database_config.postgresSQL_db_connection_pool_max
+                    max_size= self._database_config.postgresSQL_db_connection_pool_max,
+                    init= self.setup_connection
                 )
                 self._initialized = True
             logger.info("PostgresSQL database client initialized")

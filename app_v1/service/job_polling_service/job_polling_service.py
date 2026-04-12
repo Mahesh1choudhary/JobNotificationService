@@ -9,7 +9,7 @@ from app_v1.config.config_keys import SAME_COMPANY_POLLING_GAP_IN_SECONDS, JOB_R
 from app_v1.config.config_loader import fetch_key_value
 from app_v1.database import database_client
 from app_v1.database.database_client import BaseDatabaseClient
-from app_v1.database.database_models.company_job_source_model import CompanyJobSourceModel
+from app_v1.database.database_models.company_job_source_model import CompanyJobSourceModel, FetchConfig
 from app_v1.database.database_models.job_model import Job, JobProcessingStatus
 from app_v1.database.repository.companies_job_sources_repository import CompaniesJobSourcesRepository
 from app_v1.database.repository.job_repository import JobRepository
@@ -36,9 +36,9 @@ class JobPollingService():
     async def _poll_single_company_for_jobs(self, job_company_job_source:CompanyJobSourceModel):
         logger.info(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: polling for job_company_source: {job_company_job_source}")
 
-        fetch_job_list_url = job_company_job_source.fetch_job_list_url
-        if fetch_job_list_url is None:
-            logger.warning(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: fetch_job_list_url is empty for company_job_source: {job_company_job_source}")
+        fetch_config:FetchConfig = job_company_job_source.fetch_config
+        if fetch_config is None:
+            logger.warning(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: fetch_config is empty for company_job_source: {job_company_job_source}")
             return
         job_platform_name = job_company_job_source.platform_name
         if job_platform_name is None:
@@ -106,7 +106,7 @@ class JobPollingService():
                     logger.warning(f"[{self.__class__.__name__}]-[{self.start_polling.__name__}]: no entries to poll for")
 
                 for offset in range(0, total_entries, self._company_batch_size_for_polling):
-                    batch_job_sources:List[CompanyJobSourceModel] = await self._companies_job_sources_repository.get_companies_job_source_data(
+                    batch_job_sources:List[CompanyJobSourceModel] = await self._companies_job_sources_repository.get_active_companies_job_source_data(
                         offset=offset,
                         limit=self._company_batch_size_for_polling
                     )

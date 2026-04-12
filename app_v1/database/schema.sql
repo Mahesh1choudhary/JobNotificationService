@@ -6,17 +6,26 @@ CREATE TABLE IF NOT EXISTS job_platforms (
     platform_name TEXT NOT NULL UNIQUE
 );
 
+--- single time insertion only
+insert into job_platforms (platform_name) values ('greenhouse', 'mynexthire', 'rippling');
+
 ----------------------------------------------------------------------------------
 
 ---1 companies table
 CREATE TABLE IF NOT EXISTS companies_job_sources (
-    id BIGSERIAL PRIMARY KEY,
-    company_id BIGINT REFERENCES job_company_names(id) ON DELETE CASCADE,
-    platform_id BIGINT REFERENCES job_platforms(id),
-    fetch_job_list_url TEXT NOT NULL,
-    last_fetched_at TIMESTAMP WITH TIME ZONE,
+     id BIGSERIAL PRIMARY KEY,
+     company_id BIGINT REFERENCES job_company_names(id) ON DELETE CASCADE,
+     platform_id BIGINT REFERENCES job_platforms(id),
 
-    CONSTRAINT unique_source_per_company UNIQUE (company_id, platform_id, fetch_job_list_url)
+    -- Using JSONB for maximum flexibility (Headers, Body, etc.)
+     fetch_config JSONB NOT NULL DEFAULT '{}',
+
+    -- Helpful for tracking and debugging
+     is_active BOOLEAN DEFAULT TRUE,
+     last_fetched_at TIMESTAMP WITH TIME ZONE,
+
+    -- Ensuring one source per platform per company
+     CONSTRAINT unique_source_per_company UNIQUE (company_id, platform_id)
 );
 --- by default index on company_id and company_name
 
@@ -100,14 +109,14 @@ CREATE INDEX idx_job_company_names_fts ON job_company_names USING GIN (fts_token
 
 --- Job locations vector table
 CREATE TABLE IF NOT EXISTS job_locations (
-    id BIGSERIAL PRIMARY KEY,
-    job_location TEXT NOT NULL UNIQUE,
-    description TEXT,
-    embedding vector(1536),
+                                             id BIGSERIAL PRIMARY KEY,
+                                             job_location TEXT NOT NULL UNIQUE,
+                                             description TEXT,
+                                             embedding vector(1536),
 
-    fts_tokens tsvector GENERATED ALWAYS AS (
-        to_tsvector('english', job_location || ' ' || coalesce(description, ''))
-        ) STORED
+                                             fts_tokens tsvector GENERATED ALWAYS AS (
+                                                 to_tsvector('english', job_location || ' ' || coalesce(description, ''))
+                                                 ) STORED
 );
 -- vector index
 CREATE INDEX ON job_locations USING hnsw (embedding vector_cosine_ops);
@@ -141,7 +150,7 @@ CREATE INDEX idx_job_departments_fts ON job_departments USING GIN (fts_tokens);
 ----------------------------------------------------------------------------------
 
 --- Jobs table
-CREATE TABLE jobs (
+CREATE TABLE IF NOT EXISTS jobs (
   id BIGSERIAL PRIMARY KEY,
   job_company_id BIGINT NOT NULL,
   job_internal_id BIGINT NOT NULL,

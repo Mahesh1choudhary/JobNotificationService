@@ -21,13 +21,9 @@ def setup_logger():
             if not logger.handlers:
                 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-                is_local_env = os.getenv("ENV", "local") == "local"
+                # same for prod and local
+                handler = logging.StreamHandler()
 
-                #TODO: can try QueueHandle for async logging or not multiple handlers; not needed as of now
-                if is_local_env:
-                    handler = logging.StreamHandler()
-                else:
-                    handler = RotatingFileHandler("service.log", maxBytes = 10**4, backupCount=2)
 
                 handler.setLevel(logging.DEBUG)
                 handler.setFormatter(formatter)
