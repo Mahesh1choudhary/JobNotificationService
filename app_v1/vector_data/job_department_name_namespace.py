@@ -22,7 +22,7 @@ class JobDepartmentNameNamespace(BaseNamespace[JobDepartmentNameVector]):
     #TODO: need to add batch ingesting
     async def ingest_embedding_data(self, data: JobDepartmentNameVector):
         #TODO: reconsider what to embed
-        text_to_embed = f"{data.department_name}, {data.description}"
+        text_to_embed = f"{data.department_name}, {data.alias}"
         embedding_model:EmbeddingModel = llm_manager.get_embedding_model()
         embeddings = await embedding_model.get_embeddings(text_to_embed)
 
@@ -36,7 +36,7 @@ class JobDepartmentNameNamespace(BaseNamespace[JobDepartmentNameVector]):
         embedding_model:EmbeddingModel = llm_manager.get_embedding_model()
         embeddings = await embedding_model.get_embeddings(item)
 
-        column_to_extract = list(JobDepartmentNameVector.model_fields.keys())
+        column_to_extract = ["department_name", "alias"]
 
         # limit+20, so that there are enough data for ranking
         vector_search_closest_matches = await self._job_department_name_vector_repository.vector_search(embeddings, limit+20, column_to_extract)
@@ -46,6 +46,8 @@ class JobDepartmentNameNamespace(BaseNamespace[JobDepartmentNameVector]):
         final_scores:Dict[str, float] = {} # {department_name: score}
         data_objects: Dict[str, JobDepartmentNameVector] = {}
         for rank, match in enumerate(vector_search_closest_matches, start=1):
+            if match["similarity_score"] < similarity_threshold:
+                break
             data: JobDepartmentNameVector = JobDepartmentNameVector(**match)
             data_objects[data.department_name] = data
             final_scores[data.department_name] = final_scores.get(data.department_name, 0) + (1/(ranking_constant + rank))
@@ -63,3 +65,10 @@ class JobDepartmentNameNamespace(BaseNamespace[JobDepartmentNameVector]):
 
         return final_results
 
+    async def get_all_departments(self) -> List[JobDepartmentNameVector]:
+        column_to_extract = ["department_name", "alias"]
+        data = await self._job_department_name_vector_repository.get_all_data(column_to_extract)
+        result:List[JobDepartmentNameVector] = []
+        for item in data:
+            result.append(JobDepartmentNameVector(**item))
+        return result

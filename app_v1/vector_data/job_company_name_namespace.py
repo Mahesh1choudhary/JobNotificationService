@@ -22,7 +22,7 @@ class JobCompanyNameNamespace(BaseNamespace[JobCompanyNameVector]):
     #TODO: need to add batch ingesting
     async def ingest_embedding_data(self, data: JobCompanyNameVector):
         #TODO: reconsider what to embed
-        text_to_embed = f"{data.company_name}, {data.description}"
+        text_to_embed = f"{data.company_name}, {data.alias}"
         embedding_model:EmbeddingModel = llm_manager.get_embedding_model()
         embeddings = await embedding_model.get_embeddings(text_to_embed)
 
@@ -36,7 +36,7 @@ class JobCompanyNameNamespace(BaseNamespace[JobCompanyNameVector]):
         embedding_model:EmbeddingModel = llm_manager.get_embedding_model()
         embeddings = await embedding_model.get_embeddings(item)
 
-        column_to_extract = list(JobCompanyNameVector.model_fields.keys())
+        column_to_extract = ["company_name", "alias"]
 
         # limit+20, so that there are enough data for ranking
         vector_search_closest_matches = await self._job_company_name_vector_repository.vector_search(embeddings, limit+20, column_to_extract)
@@ -46,6 +46,8 @@ class JobCompanyNameNamespace(BaseNamespace[JobCompanyNameVector]):
         final_scores:Dict[str, float] = {} # {company_name: score}
         data_objects: Dict[str, JobCompanyNameVector] = {}
         for rank, match in enumerate(vector_search_closest_matches, start=1):
+            if match["similarity_score"] < similarity_threshold:
+                break
             data: JobCompanyNameVector = JobCompanyNameVector(**match)
             data_objects[data.company_name] = data
             final_scores[data.company_name] = final_scores.get(data.company_name, 0) + (1/(ranking_constant + rank))
