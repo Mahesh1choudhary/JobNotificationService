@@ -3,7 +3,8 @@ from typing import List
 import httpx
 from app_v1.commons.service_logger import setup_logger
 from app_v1.commons.time_utils import current_time_in_utc
-from app_v1.database.database_models.company_job_source_model import CompanyJobSourceModel
+from app_v1.database.database_models.company_job_source_model import CompanyJobSourceModel, FetchConfig, \
+    FetchRequestConfig
 from app_v1.models.request_models.job_creation_request import JobCreationRequest
 from app_v1.service.job_polling_service.job_polling_service_helpers.job_platform_polling.base_job_platform_polling_service import JobPlatformPollingService
 
@@ -13,17 +14,27 @@ class GreenhouseJobPlatformPollingService(JobPlatformPollingService):
     async def fetch_job_data_for_company(self, company_job_source:CompanyJobSourceModel) -> List[JobCreationRequest]:
         try:
             logger.info(f"[{self.__class__.__name__}]-[{self.fetch_job_data_for_company.__name__}]: fetching jobs for company_job_source: {company_job_source}")
-            fetch_job_list_url = company_job_source.fetch_job_list_url
-            if fetch_job_list_url is None:
-                logger.warning(f"fetch_job_url not set for company_id: {company_job_source.company_id}")
+            fetch_config:FetchConfig = company_job_source.fetch_config
+
+            if fetch_config is None:
+                logger.warning(f"fetch_config not set for company_id: {company_job_source.company_id}")
+                return []
+
+            all_jobs_fetch: FetchRequestConfig = fetch_config.all_jobs_fetch
+            if all_jobs_fetch is None:
+                logger.warning(f"all_jobs_fetch not set for company_id: {company_job_source.company_id}")
                 return []
 
             #fethcing company jobs data
             #TODO: need to add retries
             async with httpx.AsyncClient() as client:
-                response = await client.get(fetch_job_list_url)
+                response = await client.request(
+                    method=all_jobs_fetch.method,
+                    url=all_jobs_fetch.url,
+                    headers=all_jobs_fetch.headers,
+                    json=all_jobs_fetch.payload,
+                )
 
-            #TODO: need to check the timezone
             company_job_source.last_fetched_at = current_time_in_utc()
 
             company_jobs_data = response.json().get("jobs", None)

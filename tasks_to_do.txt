@@ -43,7 +43,8 @@ STATUS - PENDING
 STATUS - PENDING
 
 14 -> need to use single timezone in the project
-STATUS - PENDING
+STATUS - DONE
+NEED TO RECHECK ONCE -> do we need to setup in database also?
 
 15 -> need to do batching ain all database operations
 STATUS - PENDING
@@ -72,4 +73,20 @@ STATUS - PENDING
 
 
 21 -> Add extra column in company_job_sources for deciding whether to poll this company or not
-STATS - PENDINGTODO
+STATUS - PENDING
+
+
+
+22 -> need to create separate databases for local usage
+STATUS - PENDING
+
+
+
+23 -> need to check job structures from each platform and include more content for llm
+
+
+24 -> word matching in job location to avoiding processing them before sending them to llm.
+current flow -> job data -> tag generation -> checking if valid ( location exists, etc) -> then processed or skipped
+new flow -> job data -> checking -> if valid -> tag generation -> and processing
+
+how to check -> generate keyword map for job content and check if any location name is present -> this is basic one only -> need to research

@@ -39,7 +39,17 @@
           "filterByBuId": -1
         }
       },
-      "individual_job_fetch": null
+      "individual_job_fetch": {
+        "method": "POST",
+        "url": "https://sliceit.prod.in1.mynexthire.io/d17/careers/requisition/object",
+        "headers": {},
+        "payload": {
+          "source": "careers",
+          "id": "",
+          "code": "",
+          "reqId": "this is the job id - needs to be filled as int"
+        }
+      }
     }
   },
   {

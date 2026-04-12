@@ -40,6 +40,8 @@ class GPT4OMiniLLMModel(LLMModel):
         ### Task
         Your task is analyze the given job description and extract specific fields:
             - `job_role_name`: string -> Name of the job. Examples: SDE 1, SDE 2, Staff Engineer, Customer Success Manager, etc
+                *** Rules ***
+                    - Job name reflect the work done under the job name. Most of the time, job name is mentioned in `job_description`
             - `job_company_name` : string -> Name of the company offering the job
             - `job_type`: "Intern" | "FullTime" -> 
                 - "Intern" if internship

@@ -3,6 +3,10 @@ from app_v1.service.job_polling_service.job_polling_service_helpers.job_platform
     JobPlatformPollingService
 from app_v1.service.job_polling_service.job_polling_service_helpers.job_platform_polling.greenhouse_job_platform_polling_service import \
     GreenhouseJobPlatformPollingService
+from app_v1.service.job_polling_service.job_polling_service_helpers.job_platform_polling.mynexthire_job_platform_polling_service import \
+    MynexthireJobPlatformPollingService
+from app_v1.service.job_polling_service.job_polling_service_helpers.job_platform_polling.rippling_job_platform_polling_service import \
+    RipplingJobPlatformPollingService
 
 logger = setup_logger()
 class JobPlatformPollingServiceFactory:
@@ -10,6 +14,8 @@ class JobPlatformPollingServiceFactory:
     # names are as per in the database table job_platforms
     _platform_registry = {
         "greenhouse": GreenhouseJobPlatformPollingService,
+        "mynexthire": MynexthireJobPlatformPollingService,
+        "rippling": RipplingJobPlatformPollingService,
         "default": JobPlatformPollingService
     }
 
