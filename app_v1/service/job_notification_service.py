@@ -1,3 +1,6 @@
+import re
+from typing import List
+
 from autogen_agentchat.messages import TextMessage
 from autogen_core import CancellationToken
 
@@ -24,6 +27,8 @@ from app_v1.service.notification_service.notification_service_helpers.notificati
 from app_v1.vector_data.job_company_name_namespace import JobCompanyNameNamespace
 from app_v1.vector_data.job_department_name_namespace import JobDepartmentNameNamespace
 from app_v1.vector_data.job_location_namespace import JobLocationNamespace
+from app_v1.vector_data.vector_data_models.job_department_name_vector import JobDepartmentNameVector
+from app_v1.vector_data.vector_data_models.job_location_vector import JobLocationVector
 
 logger = setup_logger()
 
@@ -59,6 +64,12 @@ class JobNotificationService:
 
     async def generate_tags_and_send_notifications(self, job_data: Job) -> JobProcessingStatus:
         try:
+
+            #TODO: temporary- to avoid llm cost. currently job is marked skipped when location , department, company, etc is not in table
+            # so, adding prechecks to decide whether to process or not
+            should_be_skipped: bool = await self.pre_filter_checks(job_data)
+            if should_be_skipped:
+                return JobProcessingStatus.SKIPPED
 
             job_tag_response:JobTagResponse = await self.generate_tags(job_data.job_description)
 
@@ -113,4 +124,52 @@ class JobNotificationService:
         job_match_criteria =  JobMatchCriteria(job_experience_level=job_tag_response.job_experience_level, job_location=job_tag_response.job_location,
                                                job_company_name=job_tag_response.job_company_name)
         await self._job_notification_target_repository.add_new_interest_row(job_match_criteria)
+
+
+
+    async def pre_filter_checks(self, job_data:Job) -> bool:
+        return False
+        #TODO: for temporary use only
+        try:
+            job_description:str = job_data.job_description.strip()
+            all_words = re.split(r'[ ,;.\n\t]+', job_description)
+            word_set = set(all_words)
+            normalized_word_set = {w.lower() for w in word_set}
+
+            valid_locations:List[JobLocationVector] = await self._job_location_namespace.get_all_locations()
+
+            location_set = set()
+            for location in valid_locations:
+                if location.job_location:
+                    vals = re.split(r'[^a-zA-Z0-9]+', location.job_location.lower())
+                    location_set.update(vals)
+
+                if location.alias:
+                    vals = re.split(r'[^a-zA-Z0-9]+', location.alias.lower())
+                    location_set.update(vals)
+            location_set.discard('')
+            normalized_location_set = {w.lower() for w in location_set}
+
+            location_matches = normalized_word_set.intersection(normalized_location_set)
+            if not location_matches:
+                return True
+
+
+            valid_departments : List[JobDepartmentNameVector] = await self._job_department_name_namespace.get_all_departments()
+            department_set = set()
+            for department in valid_departments:
+                if department.department_name:
+                    vals = re.split(r'[^a-zA-Z0-9]+', department.department_name.lower())
+                    department_set.update(vals)
+            normalized_department_set = {w.lower() for w in department_set}
+
+            department_matches = normalized_word_set.intersection(normalized_department_set)
+            if not department_matches:
+                return True
+
+            return False
+        except Exception as exc:
+            logger.error("Error in pre_filter_checks", exc_info=True)
+            return False
+
 

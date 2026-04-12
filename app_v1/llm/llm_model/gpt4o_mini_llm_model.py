@@ -38,37 +38,45 @@ class GPT4OMiniLLMModel(LLMModel):
         - `job_description`: {job_description}
         
         ### Task
-        Your task is analyze the given job description and extract specific fields:
+        Your task is analyze the given job description and extract following specific fields:
             - `job_role_name`: string -> Name of the job. Examples: SDE 1, SDE 2, Staff Engineer, Customer Success Manager, etc
-                *** Rules ***
-                    - Job name reflect the work done under the job name. Most of the time, job name is mentioned in `job_description`
+                - Selected Job name should reflect the work done under the job.
+                - Most of the time, job name is mentioned in `job_description`, select intelligently
             - `job_company_name` : string -> Name of the company offering the job
             - `job_type`: "Intern" | "FullTime" -> 
                 - "Intern" if internship
                 - "FullTime" if full-time roles
-            - `job_experience_level`: years of experience of person. Decide based on minimum year of experience required for job
-                - ENTRY = if minimum year of experience required is in [0,2)
-                - JUNIOR = if minimum year of experience required is in [2,4)
-                - MID = if minimum year of experience required is in [4,6)
-                - SENIOR = if minimum year of experience required is in [6,10)
-                - EXPERT = if minimum year of experience required is 10+
                 
-                ***Rules for finding `job_experience_level`***:
+            - `job_experience_level`: reflects years of experience 
+                - Decide based on minimum years of experience required for job and select as per below mapping
+                    - ENTRY = if minimum year of experience required is in [0,2)
+                    - JUNIOR = if minimum year of experience required is in [2,4)
+                    - MID = if minimum year of experience required is in [4,6)
+                    - SENIOR = if minimum year of experience required is in [6,10)
+                    - EXPERT = if minimum year of experience required is 10+
+                - If minimum years of experience is not mentioned, select and map intelligently
+                - Steps to follow:
                     - First find the minimum year of experience required from the `job_description`. Now map this to only one of the available options
                     - Select only from the available options- ( ENTRY, JUNIOR, MID, SENIOR, EXPERT)
                     - Examples:
                         - If experience required is 5-6, then minimum year of experience is 5 which falls into Entry = [4,6) option
-                        - If experience required is 12, then it falls into Expert = 10+ option
-            - `job_location`: string -> Location of the job. Should be city name, Country name or remote if applicable
-            - `job_department`: string -> Department based on job work. Examples- Engineering, Sales, Finance, etc
+                        - If experience required is 12, then it falls into Expert = 10+ option 
+            - `job_location`: string -> Location of the job. 
+                - Should be city name, Country name or remote accordingly
+            - `job_department`: string -> Department based on job work.
+                - Decide based on responsibilities of the job
             - `job_link`: string | None -> link to the job
+                - `job_description` may contains multiple different links, carefully select the one which points to the job
+                - sometimes, there may not be job link info present in `job_description`
+                    
             - `job_summary`: string -> 4-5 lines summary about the job
-                - It should include info about the tech stack if present in job description: programming langauges, frameworks, databases, etc
-                - It should contain year of experience if present in job description
+                - it should include
+                    - Role responsibilities
+                    - Tech stack (programming langauge, frameworks, databases, etc )
+                    - years of experience ( if present)
         
-        ### Rules:
-        - Return ***valid JSON***. All keys must be present in output
-        - No key should be ull, choose the best possible value
+        ### Strict Rules:
+        - Output MUST be valid JSON. All keys must be present in output
         
         ### Output:
         {{

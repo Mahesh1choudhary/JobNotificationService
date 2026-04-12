@@ -89,11 +89,11 @@ CREATE EXTENSION IF NOT EXISTS vector;
 CREATE TABLE IF NOT EXISTS job_company_names (
     id BIGSERIAL PRIMARY KEY,
     company_name TEXT NOT NULL UNIQUE,
-    description TEXT,
+    alias TEXT,
     embedding vector(1536),
 
     fts_tokens tsvector GENERATED ALWAYS AS (
-    to_tsvector('english', company_name || ' ' || coalesce(description, ''))
+    to_tsvector('english', company_name || ' ' || coalesce(alias, ''))
     ) STORED
 );
 CREATE INDEX ON job_company_names
@@ -111,11 +111,11 @@ CREATE INDEX idx_job_company_names_fts ON job_company_names USING GIN (fts_token
 CREATE TABLE IF NOT EXISTS job_locations (
                                              id BIGSERIAL PRIMARY KEY,
                                              job_location TEXT NOT NULL UNIQUE,
-                                             description TEXT,
+                                             alias TEXT,
                                              embedding vector(1536),
 
                                              fts_tokens tsvector GENERATED ALWAYS AS (
-                                                 to_tsvector('english', job_location || ' ' || coalesce(description, ''))
+                                                 to_tsvector('english', job_location || ' ' || coalesce(alias, ''))
                                                  ) STORED
 );
 -- vector index
@@ -133,11 +133,12 @@ CREATE INDEX idx_job_locations_fts ON job_locations USING GIN (fts_tokens);
 CREATE TABLE IF NOT EXISTS job_departments (
    id BIGSERIAL PRIMARY KEY,
    department_name TEXT NOT NULL UNIQUE,
+   alias TEXT,
    description TEXT,
    embedding vector(1536),
 
    fts_tokens tsvector GENERATED ALWAYS AS (
-       to_tsvector('english', department_name || ' ' || coalesce(description, ''))
+       to_tsvector('english', department_name || ' ' || coalesce(alias, ''))
        ) STORED
 );
 CREATE INDEX ON job_departments

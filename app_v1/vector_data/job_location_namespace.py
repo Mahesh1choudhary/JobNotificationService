@@ -25,7 +25,7 @@ class JobLocationNamespace(BaseNamespace[JobLocationVector]):
 
     async def ingest_embedding_data(self, data: JobLocationVector):
         #TODO: reconsider what to embed
-        text_to_embed = f"{data.job_location}, {data.description}"
+        text_to_embed = f"{data.job_location}, {data.alias}"
         embedding_model:EmbeddingModel = llm_manager.get_embedding_model()
         embeddings = await embedding_model.get_embeddings(text_to_embed)
 
@@ -39,7 +39,7 @@ class JobLocationNamespace(BaseNamespace[JobLocationVector]):
         embedding_model:EmbeddingModel = llm_manager.get_embedding_model()
         embeddings = await embedding_model.get_embeddings(item)
 
-        column_to_extract = list(JobLocationVector.model_fields.keys())
+        column_to_extract = ["job_location", "alias"]
 
         # limit+20, so that there are enough data for ranking
         vector_search_closest_matches = await self._job_location_vector_repository.vector_search(embeddings, limit+20, column_to_extract)
@@ -68,3 +68,12 @@ class JobLocationNamespace(BaseNamespace[JobLocationVector]):
             final_results.append(data_objects[item])
 
         return final_results
+
+
+    async def get_all_locations(self) -> List[JobLocationVector]:
+        column_to_extract = ["job_location", "alias"]
+        data = await self._job_location_vector_repository.get_all_data(column_to_extract)
+        result:List[JobLocationVector] = []
+        for item in data:
+            result.append(JobLocationVector(**item))
+        return result

@@ -82,3 +82,18 @@ class BaseVectorRepository():
         except Exception:
             logger.error(f"Database Error in {self.full_text_search.__name__}", exc_info=True)
             raise
+
+
+    async def get_all_data(self, columns_to_extract:List[str]):
+        cols_string = ", ".join(columns_to_extract)
+        query = f"""
+            SELECT {cols_string}
+            FROM {self._table_name}
+        """
+        try:
+            rows = await self._database_client.fetch(query)
+            return rows
+        except Exception:
+            logger.error(f"Database Error in {self.get_all_data.__name__}", exc_info=True)
+            raise
+
