@@ -2,11 +2,168 @@
   {
     "company_name": "rubrik",
     "platform_name": "greenhouse",
-    "fetch_job_list_url":"https://boards-api.greenhouse.io/v1/boards/rubrik/jobs?content=true"
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://boards-api.greenhouse.io/v1/boards/rubrik/jobs?content=true",
+        "headers": {},
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
   },
   {
     "company_name": "databricks",
     "platform_name": "greenhouse",
-    "fetch_job_list_url":"https://boards-api.greenhouse.io/v1/boards/databricks/jobs?content=true"
+    "fetch_config": {
+      "method": "GET",
+      "url": "https://boards-api.greenhouse.io/v1/boards/databricks/jobs?content=true",
+      "headers": {},
+      "payload": null
+    }
+  },
+  {
+    "company_name": "slice",
+    "platform_name": "mynexthire",
+    "fetch_config": {
+      "method": "POST",
+      "url": "https://sliceit.mynexthire.com/employer/careers/reqlist/get",
+      "headers": {},
+      "payload": {
+        "source": "careers",
+        "code": "",
+        "filterByBuId": -1
+      }
+    }
+  },
+  {
+    "company_name": "rippling",
+    "platform_name": "rippling",
+    "fetch_config": {
+      "method": "GET",
+      "url": "https://www.rippling.com/en-GB/careers/open-roles?content=True",
+      "headers": {},
+      "payload": null
+    }
+  },
+  {
+    "company_name": "graviton research capital",
+    "platform_name": "greenhouse",
+    "fetch_config": {
+      "method": "GET",
+      "url": "https://boards-api.greenhouse.io/v1/boards/gravitonresearchcapital/jobs?content=true",
+      "headers": {},
+      "payload": null
+    }
+  },
+  {
+    "company_name": "quantbox research",
+    "platform_name": "greenhouse",
+    "fetch_config": {
+      "method": "GET",
+      "url": "https://boards-api.greenhouse.io/v1/boards/quantboxresearchpte/jobs?content=true",
+      "headers": {},
+      "payload": null
+    }
+  },
+  {
+    "company_name": "nk securities research",
+    "platform_name": "greenhouse",
+    "fetch_config": {
+      "method": "GET",
+      "url": "https://boards-api.greenhouse.io/v1/boards/nksecuritiesresearch/jobs?content=true",
+      "headers": {},
+      "payload": null
+    }
+  },
+  {
+    "company_name": "stripe",
+    "platform_name": "greenhouse",
+    "fetch_config": {
+      "method": "GET",
+      "url": "https://boards-api.greenhouse.io/v1/boards/Stripe/jobs?content=true",
+      "headers": {},
+      "payload": null
+    }
+  },
+  {
+    "company_name": "netskope",
+    "platform_name": "greenhouse",
+    "fetch_config": {
+      "method": "GET",
+      "url": "https://boards-api.greenhouse.io/v1/boards/Netskope/jobs?content=true",
+      "headers": {},
+      "payload": null
+    }
+  },
+  {
+    "company_name": "inmobi",
+    "platform_name": "greenhouse",
+    "fetch_config": {
+      "method": "GET",
+      "url": "https://boards-api.greenhouse.io/v1/boards/inmobi/jobs?content=true",
+      "headers": {},
+      "payload": null
+    }
+  },
+  {
+    "company_name": "glance",
+    "platform_name": "greenhouse",
+    "fetch_config": {
+      "method": "GET",
+      "url": "https://boards-api.greenhouse.io/v1/boards/glance/jobs?content=true",
+      "headers": {},
+      "payload": null
+    }
+  },
+  {
+    "company_name": "motive",
+    "platform_name": "greenhouse",
+    "fetch_config": {
+      "method": "GET",
+      "url": "https://boards-api.greenhouse.io/v1/boards/gomotive/jobs?content=true",
+      "headers": {},
+      "payload": null
+    }
+  },
+  {
+    "company_name": "cloudflare",
+    "platform_name": "greenhouse",
+    "fetch_config": {
+      "method": "GET",
+      "url": "https://boards-api.greenhouse.io/v1/boards/cloudflare/jobs?content=true",
+      "headers": {},
+      "payload": null
+    }
+  },
+  {
+    "company_name": "razorpay",
+    "platform_name": "greenhouse",
+    "fetch_config": {
+      "method": "GET",
+      "url": "https://boards-api.greenhouse.io/v1/boards/razorpaysoftwareprivatelimited/jobs?content=true",
+      "headers": {},
+      "payload": null
+    }
+  },
+  {
+    "company_name": "phonepe",
+    "platform_name": "greenhouse",
+    "fetch_config": {
+      "method": "GET",
+      "url": "https://boards-api.greenhouse.io/v1/boards/phonepe/jobs?content=true",
+      "headers": {},
+      "payload": null
+    }
+  },
+  {
+    "company_name": "6sense",
+    "platform_name": "greenhouse",
+    "fetch_config": {
+      "method": "GET",
+      "url": "https://boards-api.greenhouse.io/v1/boards/6sense/jobs?content=true",
+      "headers": {},
+      "payload": null
+    }
   }
 ]
