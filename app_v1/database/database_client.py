@@ -32,30 +32,26 @@ class BaseDatabaseClient(ABC):
 
 class PostgresSQLDatabaseClient(BaseDatabaseClient):
 
-    _thread_lock = threading.Lock()
-    _instance: Optional[PostgresSQLDatabaseClient] = None
+    _thread_local = threading.local() # each thread will have different instances
 
 
     def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            with cls._thread_lock:
-                if cls._instance is not None:
-                    return cls._instance
-                cls._instance = super(PostgresSQLDatabaseClient, cls).__new__(cls)
+        if not hasattr(cls._thread_local, "instance"):
+            cls._thread_local.instance = super(PostgresSQLDatabaseClient, cls).__new__(cls)
 
-        return cls._instance
+        return cls._thread_local.instance
 
     def __init__(self, config: PostgresSQLDatabaseConfig):
-        if getattr(self, '_constructed', False):
+        if getattr(self, '_initialized_instance', False):
             if self._database_config != config:
-                raise ValueError("PostgresSQL database client already initialized with different config. ")
+                raise ValueError("PostgresSQL database client already initialized with different config.")
             return
 
-        self._database_config: PostgresSQLDatabaseConfig = None
         super().__init__(config)
-        self._constructed = True
+        self._initialized_instance = True
         self._initialized = False
         self.async_lock = asyncio.Lock()
+        self._connection_pool = None
 
     @staticmethod
     async def setup_connection(conn):
