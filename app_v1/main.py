@@ -62,7 +62,7 @@ async def lifespan(app:FastAPI):
 
     #job polling moved to another thread's event loop to avoid delays in healthcheck and other api calls
     polling_thread = threading.Thread(target=run_polling_in_background,
-                                      daemon=True)
+                                      daemon=False)
     polling_thread.start()
 
     yield
