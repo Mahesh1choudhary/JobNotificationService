@@ -1,3 +1,4 @@
+import threading
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -17,6 +18,35 @@ from app_v1.service.job_polling_service.job_polling_service import JobPollingSer
 
 
 logger = setup_logger()
+
+
+def run_polling_in_background() -> None:
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    async def initialize_and_start():
+        llm_manager = LLMManager()
+        llm_manager.set_tag_generation_model(GPT4OMiniLLMModel())
+        llm_manager.set_embedding_model(EmbeddingModel())
+
+        database_config = DatabaseConfigFactory.create_database_config()
+        database_manager = DatabaseManager(database_config)
+        await database_manager.init()
+
+        try:
+            service = JobPollingService(database_manager.database_client)
+            await service.start_polling()
+        finally:
+            await database_manager.close()
+
+    try:
+        loop.run_until_complete(initialize_and_start())
+    except Exception as e:
+        logger.error(f"Background polling thread failed: {e}")
+    finally:
+        loop.close()
+
+
 @asynccontextmanager
 async def lifespan(app:FastAPI):
     # setting llm manager and creating database instance
@@ -30,16 +60,13 @@ async def lifespan(app:FastAPI):
 
     app.state.database_manager = database_manager #will be used in dependency injections
 
-    job_polling_service = JobPollingService(database_manager.database_client)
-    polling_task = asyncio.create_task(job_polling_service.start_polling())
+    #job polling moved to another thread's event loop to avoid delays in healthcheck and other api calls
+    polling_thread = threading.Thread(target=run_polling_in_background,
+                                      daemon=False)
+    polling_thread.start()
 
     yield
 
-    polling_task.cancel()
-    try:
-        await polling_task
-    except asyncio.CancelledError:
-        logger.info("Polling task stopped successfully")
     await database_manager.close()
 
 
