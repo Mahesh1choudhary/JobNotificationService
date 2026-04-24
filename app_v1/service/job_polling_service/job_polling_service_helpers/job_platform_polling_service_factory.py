@@ -7,6 +7,8 @@ from app_v1.service.job_polling_service.job_polling_service_helpers.job_platform
     MynexthireJobPlatformPollingService
 from app_v1.service.job_polling_service.job_polling_service_helpers.job_platform_polling.rippling_job_platform_polling_service import \
     RipplingJobPlatformPollingService
+from app_v1.service.job_polling_service.job_polling_service_helpers.job_platform_polling.uber_job_platform_polling_service import \
+    UberJobPlatformPollingService
 
 logger = setup_logger()
 class JobPlatformPollingServiceFactory:
@@ -16,6 +18,7 @@ class JobPlatformPollingServiceFactory:
         "greenhouse": GreenhouseJobPlatformPollingService,
         "mynexthire": MynexthireJobPlatformPollingService,
         "rippling": RipplingJobPlatformPollingService,
+        "uber": UberJobPlatformPollingService,
         "default": JobPlatformPollingService
     }
 

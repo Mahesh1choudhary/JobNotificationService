@@ -15,3 +15,6 @@ class JobPlatformPollingService(ABC):
     async def fetch_job_data_for_company(self, job_company_job_source:CompanyJobSourceModel) -> List[JobCreationRequest]:
         pass
 
+    @abstractmethod
+    async def process_job_data(self, job_data: dict, job_company_id: int):
+        pass

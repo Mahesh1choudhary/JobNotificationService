@@ -34,36 +34,39 @@ class JobPollingService():
 
 
     async def _poll_single_company_for_jobs(self, job_company_job_source:CompanyJobSourceModel):
-        logger.info(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: polling for job_company_source: {job_company_job_source}")
+        try:
+            logger.info(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: polling for job_company_source: {job_company_job_source}")
 
-        fetch_config:FetchConfig = job_company_job_source.fetch_config
-        if fetch_config is None:
-            logger.warning(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: fetch_config is empty for company_job_source: {job_company_job_source}")
-            return
-        job_platform_name = job_company_job_source.platform_name
-        if job_platform_name is None:
-            logger.warning(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: job_platform_name is empty for company_job_source: {job_company_job_source}")
+            fetch_config:FetchConfig = job_company_job_source.fetch_config
+            if fetch_config is None:
+                logger.warning(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: fetch_config is empty for company_job_source: {job_company_job_source}")
+                return
+            job_platform_name = job_company_job_source.platform_name
+            if job_platform_name is None:
+                logger.warning(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: job_platform_name is empty for company_job_source: {job_company_job_source}")
 
-        last_fetched_at:datetime = job_company_job_source.last_fetched_at
-        if last_fetched_at is not None:
-            #TODO: currently limiting is same for all, in future should be different for each platform if needed
-            time_after_last_fetched_seconds = (current_time_in_utc() - last_fetched_at).total_seconds()
-            time_to_wait_seconds = self._next_fetch_gap_seconds - time_after_last_fetched_seconds
-            if time_to_wait_seconds > 0:
-                logger.info(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: waiting for {time_to_wait_seconds} seconds before fetching job data for job_company_job_source: {job_company_job_source}")
-                await asyncio.sleep(time_to_wait_seconds)
+            last_fetched_at:datetime = job_company_job_source.last_fetched_at
+            if last_fetched_at is not None:
+                #TODO: currently limiting is same for all, in future should be different for each platform if needed
+                time_after_last_fetched_seconds = (current_time_in_utc() - last_fetched_at).total_seconds()
+                time_to_wait_seconds = self._next_fetch_gap_seconds - time_after_last_fetched_seconds
+                if time_to_wait_seconds > 0:
+                    logger.info(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: waiting for {time_to_wait_seconds} seconds before fetching job data for job_company_job_source: {job_company_job_source}")
+                    await asyncio.sleep(time_to_wait_seconds)
 
-        job_platform_polling_service:JobPlatformPollingService = JobPlatformPollingServiceFactory.get_job_platform_polling_service(job_platform_name)
-        if job_platform_polling_service is None:
-            logger.warning(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: No job_platform_polling_service selected for company_job_source: {job_company_job_source}")
-            return
+            job_platform_polling_service:JobPlatformPollingService = JobPlatformPollingServiceFactory.get_job_platform_polling_service(job_platform_name)
+            if job_platform_polling_service is None:
+                logger.warning(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: No job_platform_polling_service selected for company_job_source: {job_company_job_source}")
+                return
 
-        # last_fetched_a for in job_company_job_source object will be updated inside the method only
-        job_creation_requests =  await job_platform_polling_service.fetch_job_data_for_company(job_company_job_source)
-        await self._companies_job_sources_repository.update_company_job_source_last_fetched_at(job_company_job_source)
+            # last_fetched_a for in job_company_job_source object will be updated inside the method only
+            job_creation_requests =  await job_platform_polling_service.fetch_job_data_for_company(job_company_job_source)
+            await self._companies_job_sources_repository.update_company_job_source_last_fetched_at(job_company_job_source)
 
-        await self.ingest_and_process_jobs(job_creation_requests)
-        logger.info(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: polled for job_company_source: {job_company_job_source}")
+            await self.ingest_and_process_jobs(job_creation_requests)
+            logger.info(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: polled for job_company_source: {job_company_job_source}")
+        except Exception as exc:
+            logger.error(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: Error polling job_company_job_source: {job_company_job_source}", exc_info=True)
 
 
     async def ingest_and_process_jobs(self, job_creation_requests: List[JobCreationRequest]) -> None:

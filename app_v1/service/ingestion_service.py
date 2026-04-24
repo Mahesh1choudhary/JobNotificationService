@@ -26,7 +26,7 @@ class IngestionService():
     async def ingest_embedding_data(self, ingestion_request: IngestionRequest):
         namespace_instance = self._namespace_mapping[ingestion_request.namespace_type]
         if not namespace_instance:
-            raise ValueError(f"Namespace {ingestion_request.namespace_type} not supported; available ones : {",".join(self._namespace_mapping.keys())}")
+            raise ValueError(f"Namespace {ingestion_request.namespace_type} not supported; available ones : {','.join(self._namespace_mapping.keys())}")
 
         #TODO: need to add batch ingesting in the namespace
         #TODO: need to convert into lower cases
@@ -37,10 +37,11 @@ class IngestionService():
 
     async def ingest_new_companies_job_sources(self, ingestion_request: List[CompanyJobSourceIngestionRequest]):
         try:
-            tasks = [self._companies_job_sources_repository.insert_new_company_job_source(CompanyJobSourceModel(**company_job_source_request.model_dump()))
-                     for company_job_source_request in ingestion_request]
-
-            await asyncio.gather(*tasks, return_exceptions=True)
+            companies_job_sources: List[CompanyJobSourceModel] = [
+                CompanyJobSourceModel(**company_job_source_request.model_dump())
+                for company_job_source_request in ingestion_request
+            ]
+            await self._companies_job_sources_repository.insert_new_companies_job_sources(companies_job_sources)
         except Exception as exc:
             logger.error(f"Error in {self.ingest_new_companies_job_sources.__name__}", exc_info=True)
             raise

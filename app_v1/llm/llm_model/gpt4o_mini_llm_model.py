@@ -43,6 +43,7 @@ class GPT4OMiniLLMModel(LLMModel):
                 - Selected Job name should reflect the work done under the job.
                 - Most of the time, job name is mentioned in `job_description`, select intelligently
             - `job_company_name` : string -> Name of the company offering the job
+                - This should not be empty
             - `job_type`: "Intern" | "FullTime" -> 
                 - "Intern" if internship
                 - "FullTime" if full-time roles
