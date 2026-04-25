@@ -3,19 +3,23 @@
   "data":[
     {
       "department_name": "engineering",
-      "description": "engineering and technology, software development, infrastructure, research and development"
+      "alias": "engineering and technology, software development, infrastructure, research and development",
+      "description": null
     },
     {
       "department_name": "human resources",
-      "description": "people operations, talent acquisition, recruiting, people and culture"
+      "alias": "people operations, talent acquisition, recruiting, people and culture",
+      "description": null
     },
     {
       "department_name": "finance and accounting",
-      "description": "financial planning and analysis, finops"
+      "alias": "financial planning and analysis, finops",
+      "description": null
     },
     {
       "department_name": "customer success and support",
-      "description": "customer experience"
+      "alias": "customer experience",
+      "description": null
     }
   ]
 }
