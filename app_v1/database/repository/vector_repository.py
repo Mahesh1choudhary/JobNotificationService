@@ -97,3 +97,16 @@ class BaseVectorRepository():
             logger.error(f"Database Error in {self.get_all_data.__name__}", exc_info=True)
             raise
 
+    async def get_data_by_id(self, item_id:int, columns_to_extract:List[str]):
+        cols_string = ", ".join(columns_to_extract)
+        query = f"""
+            SELECT {cols_string} 
+            FROM {self._table_name}
+            WHERE id=$1
+        """
+        try:
+            row = await self._database_client.fetchrow(query, item_id)
+            return row
+        except Exception:
+            logger.error(f"Database Error in {self.get_data_by_id.__name__}", exc_info=True)
+            raise

@@ -65,5 +65,9 @@ class JobCompanyNameNamespace(BaseNamespace[JobCompanyNameVector]):
 
         return final_results
 
-
+    async def get_company_name_by_id(self, id: int) -> str:
+        column_to_extract = ["company_name"]
+        result = await self._job_company_name_vector_repository.get_data_by_id(id,column_to_extract)
+        company_name = dict(result).get("company_name")
+        return company_name
 
