@@ -48,7 +48,7 @@ class GreenhouseJobPlatformPollingService(JobPlatformPollingService):
             logger.info(f"[{self.__class__.__name__}]-[{self.fetch_job_data_for_company.__name__}]: fetched {len(company_jobs_data)} raw jobs for company_job_source: {company_job_source}")
             return company_jobs_data
         except Exception as exc:
-            logger.error(f"[{self.__class__.__name__}]-[{self.fetch_raw_job_items.__name__}]: error fetching jobs for company_job_source: {company_job_source}", exc_info=exc)
+            logger.error(f"[{self.__class__.__name__}]-[{self.fetch_job_data_for_company.__name__}]: error fetching jobs for company_job_source: {company_job_source}", exc_info=exc)
             return []
 
     async def process_job_data(self, job_data: dict, job_company_id: int) -> JobCreationRequest | None:
