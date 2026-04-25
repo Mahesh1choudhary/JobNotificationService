@@ -16,7 +16,7 @@ def setup_logger():
                 return service_logger
 
             logger = logging.getLogger("Service_logger")
-            logger.setLevel(logging.DEBUG)
+            logger.setLevel(logging.ERROR)
 
             if not logger.handlers:
                 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -25,7 +25,7 @@ def setup_logger():
                 handler = logging.StreamHandler()
 
 
-                handler.setLevel(logging.DEBUG)
+                handler.setLevel(logging.ERROR)
                 handler.setFormatter(formatter)
                 logger.addHandler(handler)
 

@@ -220,5 +220,22 @@
       },
       "individual_job_fetch": null
     }
+  },
+  {
+    "company_name": "uber",
+    "platform_name": "uber",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "POST",
+        "url": "https://www.uber.com/api/loadSearchJobsResults?localeCode=en",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+          "x-csrf-token": "x"
+        },
+        "payload": {"limit":0,"page":1,"params":{"department":[],"lineOfBusinessName":[],"location":[],"programAndPlatform":[],"team":[]}}
+      },
+      "individual_job_fetch": null
+    }
   }
 ]
