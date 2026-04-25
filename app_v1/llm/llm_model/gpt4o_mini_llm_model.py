@@ -36,6 +36,7 @@ class GPT4OMiniLLMModel(LLMModel):
              
         ### Input:
         - `job_description`: {job_description}
+            - Sometimes, some part of the description can be in another language also, so translate into english accordingly
         
         ### Task
         Your task is analyze the given job description and extract following specific fields:

@@ -26,6 +26,19 @@
     }
   },
   {
+    "company_name": "groww",
+    "platform_name": "greenhouse",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://boards-api.greenhouse.io/v1/boards/groww/jobs?content=true",
+        "headers": {},
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
     "company_name": "slice",
     "platform_name": "mynexthire",
     "fetch_config": {
@@ -253,5 +266,294 @@
       },
       "individual_job_fetch": null
     }
+  },
+  {
+    "company_name": "giga",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/gigaml?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
+    "company_name": "notion",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/notion?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
+    "company_name": "snowflake",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/snowflake?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
+    "company_name": "deel",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/deel?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
+    "company_name": "cartesia",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/cartesia?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
+    "company_name": "harvey",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/harvey?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
+    "company_name": "riveron",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/riveron?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
+    "company_name": "pulsora",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/pulsora%20inc?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
+    "company_name": "kong",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/kong?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
+    "company_name": "granica",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/granica?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
+    "company_name": "lyric",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/lyric?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
+    "company_name": "furtherai",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/furtherai?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
+    "company_name": "wisdomai",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/wisdom%20ai?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
+    "company_name": "weave",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/weave?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
+    "company_name": "socure",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/socure?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
+    "company_name": "oneapp",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/oneapp?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
+    "company_name": "skyflow",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/skyflow?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
+  },
+  {
+    "company_name": "altimateai",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/altimate?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
   }
+
 ]
