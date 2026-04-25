@@ -136,7 +136,89 @@
     {
       "company_name": "ema",
       "alias": ""
+    },
+    {
+      "company_name": "giga",
+      "alias": ""
+    },
+    {
+      "company_name": "notion",
+      "alias": ""
+    },
+    {
+      "company_name": "snowflake",
+      "alias": ""
+    },
+    {
+      "company_name": "deel",
+      "alias": ""
+    },
+    {
+      "company_name": "cartesia",
+      "alias": ""
+    },
+    {
+      "company_name": "harvey",
+      "alias": ""
+    },{
+      "company_name": "riveron",
+      "alias": ""
+    },
+    {
+      "company_name": "pulsora",
+      "alias": ""
+    },
+    {
+      "company_name": "kong",
+      "alias": ""
+    },
+    {
+      "company_name": "granica",
+      "alias": ""
+    },
+    {
+      "company_name": "lyric",
+      "alias": ""
+    },
+    {
+      "company_name": "furtherai",
+      "alias": ""
+    },
+    {
+      "company_name": "wisdomai",
+      "alias": ""
+    },
+    {
+      "company_name": "sentilink",
+      "alias": ""
+    },
+    {
+      "company_name": "weave",
+      "alias": ""
+    },
+    {
+      "company_name": "ontic",
+      "alias": ""
+    },
+    {
+      "company_name": "socure",
+      "alias": ""
+    },
+    {
+      "company_name": "oneapp",
+      "alias": ""
+    },
+    {
+      "company_name": "skyflow",
+      "alias": ""
+    },
+    {
+      "company_name": "altimateai",
+      "alias": ""
+    },
+    {
+      "company_name": "groww",
+      "alias": ""
     }
-
   ]
 }
