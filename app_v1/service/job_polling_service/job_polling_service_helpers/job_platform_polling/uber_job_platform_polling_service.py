@@ -1,4 +1,3 @@
-import asyncio
 from typing import List
 
 import httpx
@@ -12,15 +11,17 @@ from app_v1.service.job_polling_service.job_polling_service_helpers.job_platform
     JobPlatformPollingService
 
 logger = setup_logger()
+
+
 class UberJobPlatformPollingService(JobPlatformPollingService):
 
     def __init__(self):
         self._job_link_base_url = "https://www.uber.com/global/en/careers/list/"
 
-    async def fetch_job_data_for_company(self, company_job_source:CompanyJobSourceModel) -> List[JobCreationRequest]:
+    async def fetch_job_data_for_company(self, company_job_source:CompanyJobSourceModel) -> List[dict]:
         try:
             logger.info(f"[{self.__class__.__name__}]-[{self.fetch_job_data_for_company.__name__}]: fetching jobs for company_job_source: {company_job_source}")
-            fetch_config:FetchConfig = company_job_source.fetch_config
+            fetch_config: FetchConfig = company_job_source.fetch_config
 
             if fetch_config is None:
                 logger.warning(f"fetch_config not set for company_id: {company_job_source.company_id}")
@@ -31,8 +32,7 @@ class UberJobPlatformPollingService(JobPlatformPollingService):
                 logger.warning(f"all_jobs_fetch not set for company_id: {company_job_source.company_id}")
                 return []
 
-            #fethcing company jobs data
-            #TODO: need to add retries and timouts
+            #TODO: need to add retries and timeouts
             async with httpx.AsyncClient() as client:
                 response = await client.request(
                     method=all_jobs_fetch.method,
@@ -45,33 +45,26 @@ class UberJobPlatformPollingService(JobPlatformPollingService):
 
             company_jobs_data = response.json().get("data", None).get("results", None)
             if company_jobs_data is None:
-                logger.warning(f"company_jobs_data is empty for company_id: {company_job_source.id}")
+                logger.warning(f"company_jobs_data is empty for company_id: {company_job_source.company_id}")
                 return []
 
-            tasks = [self.process_job_data(job_data, company_job_source.company_id) for job_data in company_jobs_data]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-            job_creation_requests = [req for req in results if req is not None]
-            logger.info(f"[{self.__class__.__name__}]-[{self.fetch_job_data_for_company.__name__}]: fetched {len(job_creation_requests)} valid jobs for company_job_source: {company_job_source}")
-            return job_creation_requests
+            logger.info(f"[{self.__class__.__name__}]-[{self.fetch_job_data_for_company.__name__}]: fetched {len(company_jobs_data)} raw jobs for company_job_source: {company_job_source}")
+            return company_jobs_data
         except Exception as exc:
             logger.error(f"[{self.__class__.__name__}]-[{self.fetch_job_data_for_company.__name__}]: error fetching jobs for company_job_source: {company_job_source}", exc_info=exc)
             return []
 
-
-
-    async def process_job_data(self, job_data: dict, job_company_id: int) -> JobCreationRequest:
+    async def process_job_data(self, job_data: dict, job_company_id: int) -> JobCreationRequest | None:
         try:
             logger.info(f"[{self.__class__.__name__}]-[{self.process_job_data.__name__}]: processing job for company_id: {job_company_id}")
             company_specific_job_id = job_data.get("id", None)
-            # TODO: this is compulsory as of now -> as we define uniqueness of job based on this only in database
-            #TODO: will ignore jobs wihtout internal job id for now
+            # TODO: will ignore jobs without internal job id for now
             if company_specific_job_id is None:
                 logger.info(f"[{self.__class__.__name__}]-[{self.process_job_data.__name__}]: company_specific_job_id is None for job for company_id: {job_company_id}")
                 return None
 
             job_link = self._job_link_base_url + str(company_specific_job_id)
             job_description = f"job title: {job_data.get('title', None)}" + f"job location data : {job_data.get('location', None)};" + f"department data : {job_data.get('department', None)};"
-
             #TODO: need to do processing on job_content
             job_description = job_description + f"job content data : {job_data.get('description', None)}"
             company_specific_job_id = str(company_specific_job_id)
@@ -79,10 +72,3 @@ class UberJobPlatformPollingService(JobPlatformPollingService):
         except Exception as exc:
             logger.error(f"[{self.__class__.__name__}]-[{self.process_job_data.__name__}]: Error processing job for company_id:{job_company_id}", exc_info=True)
             return None
-
-
-
-
-
-
-

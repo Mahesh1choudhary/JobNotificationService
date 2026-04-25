@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS job_platforms (
 );
 
 --- single time insertion only
-insert into job_platforms (platform_name) values ('greenhouse', 'mynexthire', 'rippling');
+insert into job_platforms (platform_name) values ('greenhouse', 'mynexthire', 'rippling', 'uber', 'ashbyhq');
 
 ----------------------------------------------------------------------------------
 
@@ -158,8 +158,10 @@ CREATE TABLE IF NOT EXISTS jobs (
   job_link TEXT,
   job_description TEXT NOT NULL,
   job_description_hash TEXT,
-  job_processing_status TEXT NOT NULL DEFAULT 'pending'
-      CHECK (job_processing_status IN ('pending', 'processed', 'skipped')),
+  job_processing_status TEXT NOT NULL DEFAULT 'pending',
+    CHECK (job_processing_status IN ('pending', 'processed', 'skipped')),
+  raw_job_tag_response JSONB,
+  updated_job_tag_response JSONB,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 

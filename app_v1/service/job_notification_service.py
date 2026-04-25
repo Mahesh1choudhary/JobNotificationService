@@ -13,6 +13,7 @@ from app_v1.database.database_config import DatabaseConfigFactory
 from app_v1.database.database_manager import DatabaseManager
 from app_v1.database.database_models.job_model import Job, JobProcessingStatus
 from app_v1.database.repository.job_notification_target_repository import JobNotificationTargetRepository
+from app_v1.database.repository.job_repository import JobRepository
 from app_v1.llm.llm_manager import LLMManager
 from app_v1.llm.llm_model.embedding_model import EmbeddingModel
 from app_v1.llm.llm_model.gpt4o_mini_llm_model import GPT4OMiniLLMModel
@@ -42,6 +43,7 @@ class JobNotificationService:
         self._job_location_namespace = JobLocationNamespace(database_client)
         self._job_department_name_namespace = JobDepartmentNameNamespace(database_client)
         self._job_notification_target_repository = JobNotificationTargetRepository(database_client)
+        self._job_repository = JobRepository(database_client)
         self._similarity_threshold = fetch_key_value(SIMILARITY_THRESHOLD_FOR_VECTOR_SEARCH, float)
 
         #TODO: in future all  handler, event bus setup,etc should be at a common separate place- maybe in fastapi lifespan
@@ -71,20 +73,25 @@ class JobNotificationService:
             if should_be_skipped:
                 return JobProcessingStatus.SKIPPED
 
-            job_tag_response:JobTagResponse = await self.generate_tags(job_data.job_description)
+            raw_job_tag_response:JobTagResponse = await self.generate_tags(job_data.job_description)
 
             #TODO: job_data has company_id, so company name can come from there
-            job_tag_response.job_link = job_data.job_link
-            job_tag_response, eligible_for_sending = await self.update_by_closest_matches(job_tag_response)
+            raw_job_tag_response.job_link = job_data.job_link
+            job_company_name = await self._job_company_name_namespace.get_company_name_by_id(job_data.job_company_id) #TODO: it should be cached instead of db query every time
+            if job_company_name is not None:
+                raw_job_tag_response.job_company_name = job_company_name
+
+            updated_job_tag_response, eligible_for_sending = await self.update_by_closest_matches(raw_job_tag_response)
             if not eligible_for_sending:
                 return JobProcessingStatus.SKIPPED
 
             # adding combination row in interest/job_notification_target table- will be ignored if already present
-            await self.add_new_interest_row(job_tag_response)
+            await self.add_new_interest_row(updated_job_tag_response)
+            await self._job_repository.add_job_tag_responses(job_data.id, raw_job_tag_response, updated_job_tag_response)
 
-            notification_payload = JobNotificationPayload(**job_tag_response.model_dump())
+            notification_payload = JobNotificationPayload(**updated_job_tag_response.model_dump())
 
-            job_event = JobEvent(event_type=EventType.JOB_EVENT, job_tag_response=job_tag_response, job_notification_payload= notification_payload)
+            job_event = JobEvent(event_type=EventType.JOB_EVENT, job_tag_response=updated_job_tag_response, job_notification_payload= notification_payload)
             await self._event_publisher.publish(job_event)
 
             return JobProcessingStatus.PROCESSED

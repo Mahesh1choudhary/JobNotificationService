@@ -7,6 +7,7 @@ from app_v1.commons.time_utils import current_time_in_utc
 from app_v1.database.database_client import BaseDatabaseClient
 from app_v1.database.database_models.job_model import Job, JobProcessingStatus
 from app_v1.database.tables import DatabaseTables
+from app_v1.models.data_models.job_tag_response import JobTagResponse
 from app_v1.models.request_models.job_creation_request import JobCreationRequest
 
 logger = setup_logger()
@@ -76,4 +77,17 @@ class JobRepository:
             await self._database_client.execute(query, cutoff_timestamp)
         except Exception:
             logger.error(f"Database error in {self.remove_old_jobs.__name__}", exc_info=True)
+            raise
+
+    async def add_job_tag_responses(self, job_data_id:int, raw_job_tag_response:JobTagResponse, updated_job_tag_response:JobTagResponse) -> None:
+        query = f"""
+            UPDATE {DatabaseTables.JOB_TABLE.value}
+            SET raw_job_tag_response= $2, updated_job_tag_response= $3
+            WHERE id = $1
+        """
+
+        try:
+            await self._database_client.execute(query, job_data_id, raw_job_tag_response.model_dump(), updated_job_tag_response.model_dump())
+        except Exception:
+            logger.error(f"Database error in {self.add_job_tag_responses.__name__}", exc_info=True)
             raise
