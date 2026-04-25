@@ -82,12 +82,12 @@ class JobNotificationService:
                 raw_job_tag_response.job_company_name = job_company_name
 
             updated_job_tag_response, eligible_for_sending = await self.update_by_closest_matches(raw_job_tag_response)
+            await self._job_repository.add_job_tag_responses(job_data.id, raw_job_tag_response, updated_job_tag_response)
             if not eligible_for_sending:
                 return JobProcessingStatus.SKIPPED
 
             # adding combination row in interest/job_notification_target table- will be ignored if already present
             await self.add_new_interest_row(updated_job_tag_response)
-            await self._job_repository.add_job_tag_responses(job_data.id, raw_job_tag_response, updated_job_tag_response)
 
             notification_payload = JobNotificationPayload(**updated_job_tag_response.model_dump())
 

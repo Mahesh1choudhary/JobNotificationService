@@ -34,7 +34,7 @@ class JobPollingService:
 
     async def _poll_single_company_for_jobs(self, job_company_job_source:CompanyJobSourceModel) -> List[JobProcessingItem]:
         try:
-            if job_company_job_source.company_id != 73:
+            if job_company_job_source.company_name != "ema":
                 return []
 
             logger.info(f"[{self.__class__.__name__}]-[{self._poll_single_company_for_jobs.__name__}]: polling for job_company_source: {job_company_job_source}")
@@ -105,6 +105,7 @@ class JobPollingService:
     async def start_polling(self):
         logger.info(f"[{self.__class__.__name__}]-[{self.start_polling.__name__}]: Starting the polling")
         while True:
+            await asyncio.sleep(2)
             try:
                 total_entries = await self._companies_job_sources_repository.get_total_entries_count()
                 if total_entries == 0:
