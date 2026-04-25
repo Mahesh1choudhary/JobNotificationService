@@ -3,107 +3,107 @@
   "data":[
     {
       "job_location": "bangalore, karnataka",
-      "description": "bengaluru, bengaluru Urban"
+      "alias": "bengaluru, bengaluru Urban"
     },
     {
       "job_location": "gurugram, haryana",
-      "description": "gurgaon"
+      "alias": "gurgaon"
     },
     {
       "job_location": "noida, uttar pradesh",
-      "description": "greater noida"
+      "alias": "greater noida"
     },
     {
       "job_location": "new delhi",
-      "description": "delhi, new delhi, delhi ncr"
+      "alias": "delhi, new delhi, delhi ncr"
     },
     {
       "job_location": "chennai, tamil nadu",
-      "description": "chennai city, madras"
+      "alias": "chennai city, madras"
     },
     {
       "job_location": "pune, maharashtra",
-      "description": ""
+      "alias": ""
     },
     {
       "job_location": "mumbai, maharashtra",
-      "description": "bombay, navi mumbai"
+      "alias": "bombay, navi mumbai"
     },
     {
       "job_location": "gandhinager, gujarat",
-      "description": "gift city"
+      "alias": "gift city"
     },
     {
       "job_location": "kochi, keralam",
-      "description": ""
+      "alias": ""
     },
     {
       "job_location": "singapore",
-      "description": ""
+      "alias": ""
     },
     {
       "job_location": "london, united kingdom",
-      "description": "london, greater london"
+      "alias": "london, greater london"
     },
     {
       "job_location": "dublin, ireland",
-      "description": "city of dublin"
+      "alias": "city of dublin"
     },
     {
       "job_location": "warsaw, poland",
-      "description": "warszawa"
+      "alias": "warszawa"
     },
     {
       "job_location": "krakow, poland",
-      "description": "cracow, kraków"
+      "alias": "cracow, kraków"
     },
     {
       "job_location": "berlin, germany",
-      "description": ""
+      "alias": ""
     },
     {
       "job_location": "munich, germany",
-      "description": "münchen"
+      "alias": "münchen"
     },
     {
       "job_location": "amsterdam, netherlands",
-      "description": ""
+      "alias": ""
     },
     {
       "job_location": "san francisco, california",
-      "description": "san francisco bay area"
+      "alias": "san francisco bay area"
     },
     {
       "job_location": "new york city, new york",
-      "description": "nyc, manhattan, brooklyn"
+      "alias": "nyc, manhattan, brooklyn"
     },
     {
       "job_location": "seattle, washington",
-      "description": "bellevue, redmond"
+      "alias": "bellevue, redmond"
     },
     {
       "job_location": "austin, texas",
-      "description": ""
+      "alias": ""
     },
     {
       "job_location": "toronto, canada",
-      "description": "greater toronto area"
+      "alias": "greater toronto area"
     },
     {
       "job_location": "vancouver, canada",
-      "description": ""
+      "alias": ""
     },
     {
       "job_location": "sydney, australia",
-      "description": "sydney nsw"
+      "alias": "sydney nsw"
     },
     {
       "job_location": "remote",
-      "description": "work from home, wfh, anywhere"
+      "alias": "work from home, wfh, anywhere"
     },
     {
       "job_location": "paris, france",
-      "description": ""
+      "alias": ""
     }
 
   ]

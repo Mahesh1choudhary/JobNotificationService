@@ -3,135 +3,135 @@
   "data":[
     {
       "company_name": "rubrik",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "databricks",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "tower research capital",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "rubrik",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "atlassian",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "uber",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "google",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "d.e. shaw",
-      "description": "d.e. shaw group, d.e. shaw india"
+      "alias": "d.e. shaw group, d.e. shaw india"
     },
     {
       "company_name": "razorpay",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "browserstack",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "confluent",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "graviton research capital",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "hudson river trading",
-      "description": "hrt"
+      "alias": "hrt"
     },
     {
       "company_name": "jane street",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "microsoft",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "meta",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "amazon",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "salesforce",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "intuit",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "nvidia",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "adobe",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "slice",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "rippling",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "quantbox research",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "nk securities research",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "stripe",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "netskope",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "inmobi",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "glance",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "motive",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "cloudflare",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "phonepe",
-      "description": ""
+      "alias": ""
     },
     {
       "company_name": "6sense",
-      "description": ""
+      "alias": ""
     }
   ]
 }

@@ -237,5 +237,21 @@
       },
       "individual_job_fetch": null
     }
+  },
+  {
+    "company_name": "ema",
+    "platform_name": "ashbyhq",
+    "fetch_config": {
+      "all_jobs_fetch": {
+        "method": "GET",
+        "url": "https://api.ashbyhq.com/posting-api/job-board/ema?includeCompensation=true",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        },
+        "payload": null
+      },
+      "individual_job_fetch": null
+    }
   }
 ]
