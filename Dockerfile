@@ -3,27 +3,31 @@ FROM python:3.11-slim
 
 # Prevent Python from buffering logs
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
 
 # Set working directory
-WORKDIR /app_v1
+WORKDIR /app
 
 # Install system dependencies (if needed)
 RUN apt-get update && apt-get install -y \
-    build-essential \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first (for caching)
-COPY ../app_v1/requirements.txt .
+COPY app_v1/requirements.txt .
 
 # Install dependencies
-RUN pip install --no-cache-dir -r ../app_v1/requirements.txt
+RUN pip install --no-cache-dir \
+    --trusted-host pypi.org \
+    --trusted-host pypi.python.org \
+    --trusted-host files.pythonhosted.org \
+    -r requirements.txt
 
 # Copy your code
-COPY . .
+COPY app_v1 ./app_v1
 
 # Expose port (Render expects 10000 usually)
 EXPOSE 10000
 
 # Run the app
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000"]
+CMD ["uvicorn", "app_v1.main:app", "--host", "0.0.0.0", "--port", "10000"]
