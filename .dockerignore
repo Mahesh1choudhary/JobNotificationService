@@ -1,0 +1,20 @@
+__pycache__
+**/__pycache__
+*.pyc
+*.pyo
+.git
+.gitignore
+
+# Exclude config files with secrets — use env vars in prod
+app_v1/config/config_data.json
+app_v1/config/config_data_local.json
+app_v1/config/config_data.env
+*.env
+
+# Test/dev files
+test_data.json
+testing.py
+ingestion_data/
+design_docs/
+*.md
+*.iml
